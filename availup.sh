@@ -48,13 +48,13 @@ elif [ "$(uname -m)" = "aarch64" ]; then
     sudo mv avail-light /usr/local/bin
     rm avail-light-linux-aarch64.tar.gz
 else
-    echo "📥 No binary available for this archicture, building from source instead. This can take a while..."
+    echo "📥 No binary available for this architecture, building from source instead. This can take a while..."
     # check if cargo is available, else throw error
     if command -v cargo >/dev/null 2>&1; then
         echo "📦 Cargo is available. Building from source..."
         # check if avail-light is cloned in home directly
         if [ -d "${HOME}/avail-light" ]; then
-            echo "📂 avail-light is already cloned. Pulling latest changes..."
+            echo "📂 Avail-light is already cloned. Pulling latest changes..."
             cd ~/avail-light
             git pull
         else
