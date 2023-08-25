@@ -27,9 +27,8 @@ if [ "$(uname -m)" = "x86_64" ]; then
     fi
     # use tar to extract the downloaded file and move it to /usr/local/bin
     tar -xzf avail-light-linux-amd64.tar.gz
-    mv avail-light-linux-amd64 avail-light
-    chmod +x avail-light
-    sudo mv avail-light /usr/local/bin
+    chmod +x avail-light-linux-amd64
+    sudo mv avail-light-linux-amd64 /usr/local/bin/avail-light
     rm avail-light-linux-amd64.tar.gz
 elif [ "$(uname -m)" = "aarch64" ]; then
     # check if curl is available else use wget
@@ -43,9 +42,8 @@ elif [ "$(uname -m)" = "aarch64" ]; then
     fi
     # use tar to extract the downloaded file and move it to /usr/local/bin
     tar -xzf avail-light-linux-aarch64.tar.gz
-    mv avail-light-linux-aarch64 avail-light
-    chmod +x avail-light
-    sudo mv avail-light /usr/local/bin
+    chmod +x avail-light-linux-aarch64
+    sudo mv avail-light-linux-aarch64 /usr/local/bin/avail-light
     rm avail-light-linux-aarch64.tar.gz
 else
     echo "📥 No binary available for this architecture, building from source instead. This can take a while..."
