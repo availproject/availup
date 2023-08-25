@@ -49,24 +49,26 @@ elif [ "$(uname -m)" = "aarch64" ]; then
     rm avail-light-linux-aarch64.tar.gz
 else
     echo "📥 No binary available for this architecture, building from source instead. This can take a while..."
-    # check if cargo is available, else throw error
+    # check if cargo is not available, else attempt to install through rustup
     if command -v cargo >/dev/null 2>&1; then
         echo "📦 Cargo is available. Building from source..."
-        # check if avail-light is cloned in home directly
-        if [ -d "${HOME}/avail-light" ]; then
-            echo "📂 Avail-light is already cloned. Pulling latest changes..."
-            cd ~/avail-light
-            git pull
-        else
-            echo "📂 Avail-light is not cloned. Cloning..."
-            git clone -q --depth=1 --single-branch --branch=main https://github.com/availproject/avail-light.git ~/avail-light
-            cd ~/avail-light
-        fi
-        cargo install --locked --path . --bin avail-light
     else
-        echo "🚫 Cargo is not available. Please install cargo and try again."
-        exit 1
+        echo "👀 Cargo is not available. Attempting to install with Rustup..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source $HOME/.cargo/env
+        echo "📦 Cargo is now available. Reattempting to build from source..."
     fi
+    # check if avail-light folder exists in home directory, if yes, pull latest changes, else clone the repo
+    if [ -d "${HOME}/avail-light" ]; then
+        echo "📂 Avail-light is already cloned. Pulling latest changes..."
+        cd ~/avail-light
+        git pull
+    else
+        echo "📂 Avail-light is not cloned. Cloning..."
+        git clone -q --depth=1 --single-branch --branch=main https://github.com/availproject/avail-light.git ~/avail-light
+        cd ~/avail-light
+    fi
+    cargo install --locked --path . --bin avail-light
 fi
 echo "✅ Availup exited successfully."
 echo "⛓️ Starting Avail. Future instances of the light client can be started by invoking avail-light -c ~/.avail/config.yml"
