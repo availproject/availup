@@ -7,7 +7,7 @@ if [ ! -d "${HOME}/.avail-light" ]; then
 fi
 if [ ! -f "${HOME}/.avail/config.yml" ]; then
     touch ~/.avail/config.yml
-    echo "log_level = \"info\"\nhttp_server_host = \"127.0.0.1\"\nhttp_server_port = \"7000\"\n\nsecret_key = { seed = \"${RANDOM}avail${RANDOM}\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://kate.avail.tools:443/ws\"]\napp_id = 0\nconfidence = 92.0\navail_path = \"${HOME}/.avail-light\"\nbootstraps = [[\"12D3KooWMm1c4pzeLPGkkCJMAgFbsfQ8xmVDusg272icWsaNHWzN\", \"/ip4/127.0.0.1/tcp/37000\"]]" >~/.avail/config.yml
+    echo "log_level = \"info\"\nhttp_server_host = \"127.0.0.1\"\nhttp_server_port = \"7000\"\n\nsecret_key = { seed = \"${RANDOM}avail${RANDOM}\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://kate.avail.tools:443/ws\"]\napp_id = 0\nconfidence = 92.0\navail_path = \"${HOME}/.avail-light\"\nbootstraps = [[\"12D3KooWMm1c4pzeLPGkkCJMAgFbsfQ8xmVDusg272icWsaNHWzN\", \"/ip4/127.0.0.1/tcp/37000\"]]" > ~/.avail/config.yml
 fi
 # check if avail-light binary is installed, if yes, just run it
 if command -v avail-light >/dev/null 2>&1; then
@@ -62,12 +62,12 @@ else
             git clone -q --depth=1 --single-branch --branch=main https://github.com/availproject/avail-light.git ~/avail-light
             cd ~/avail-light
         fi
-        cargo install --debug --locked --path . --bin avail-light
+        cargo install --locked --path . --bin avail-light
     else
         echo "🚫 Cargo is not available. Please install cargo and try again."
         exit 1
     fi
 fi
 echo "✅ Availup exited successfully."
-echo "⛓️ Starting Avail. Future instances of the light client can be started by invoking avail-light -c .avail/config.yml"
+echo "⛓️ Starting Avail. Future instances of the light client can be started by invoking avail-light -c ~/.avail/config.yml"
 avail-light -c ~/.avail/config.yml
