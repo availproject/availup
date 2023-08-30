@@ -18,9 +18,9 @@ fi
 if [ "$(uname -m)" = "x86_64" ]; then
     # check if curl is available else use wget
     if command -v curl >/dev/null 2>&1; then
-        curl -sLO https://github.com/availproject/avail-light/releases/download/v1.5.0-rc2/avail-light-linux-amd64.tar.gz
+        curl -sLO https://github.com/availproject/avail-light/releases/download/v1.6.0-rc1/avail-light-linux-amd64.tar.gz
     elif command -v wget >/dev/null 2>&1; then
-        wget -qO- https://github.com/availproject/avail-light/releases/download/v1.5.0-rc2/avail-light-linux-amd64.tar.gz
+        wget -qO- https://github.com/availproject/avail-light/releases/download/v1.6.0-rc1/avail-light-linux-amd64.tar.gz
     else
         echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
         exit 1
@@ -30,12 +30,27 @@ if [ "$(uname -m)" = "x86_64" ]; then
     chmod +x avail-light-linux-amd64
     sudo mv avail-light-linux-amd64 /usr/local/bin/avail-light
     rm avail-light-linux-amd64.tar.gz
-elif [ "$(uname -m)" = "aarch64" ]; then
+elif [ "$(uname -m)" = "arm64" -a "$(uname -s)" = "Darwin" ]; then
     # check if curl is available else use wget
     if command -v curl >/dev/null 2>&1; then
-        curl -sLO https://github.com/availproject/avail-light/releases/download/v1.5.0-rc2/avail-light-linux-aarch64.tar.gz
+        curl -sLO https://github.com/availproject/avail-light/releases/download/v1.6.0-rc1/avail-light-apple-arm64.tar.gz
     elif command -v wget >/dev/null 2>&1; then
-        wget -qO- https://github.com/availproject/avail-light/releases/download/v1.5.0-rc2/avail-light-linux-aarch64.tar.gz
+        wget -qO- https://github.com/availproject/avail-light/releases/download/v1.6.0-rc1/avail-light-apple-arm64.tar.gz
+    else
+        echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
+        exit 1
+    fi
+    # use tar to extract the downloaded file and move it to /usr/local/bin
+    tar -xzf avail-light-apple-arm64.tar.gz
+    chmod +x avail-light-apple-arm64
+    sudo mv avail-light-apple-arm64 /usr/local/bin/avail-light
+    rm avail-light-apple-arm64.tar.gz
+elif [ "$(uname -m)" = "aarch64" -o "$(uname -m)" = "arm64" ]; then
+    # check if curl is available else use wget
+    if command -v curl >/dev/null 2>&1; then
+        curl -sLO https://github.com/availproject/avail-light/releases/download/v1.6.0-rc1/avail-light-linux-aarch64.tar.gz
+    elif command -v wget >/dev/null 2>&1; then
+        wget -qO- https://github.com/availproject/avail-light/releases/download/v1.6.0-rc1/avail-light-linux-aarch64.tar.gz
     else
         echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
         exit 1
