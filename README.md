@@ -1,9 +1,9 @@
 ## Availup
 To run an Avail light client, simply run the following command:
 ```bash
-curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/availproject/availup/main/availup.sh | sh
+curl -sL1 avail.sh | sh
 ```
 or, with `wget`:
 ```bash
-wget --https-only --secure-protocol=TLSv1_2 -O - https://raw.githubusercontent.com/availproject/availup/main/availup.sh | sh
+wget --https-only --secure-protocol=TLSv1_2 --quiet -O - avail.sh | sh
 ```
