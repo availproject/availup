@@ -7,20 +7,30 @@ if [ ! -d "${HOME}/.avail-light" ]; then
 fi
 if [ ! -f "${HOME}/.avail/config.yml" ]; then
     touch ~/.avail/config.yml
-    echo "log_level = \"info\"\nhttp_server_host = \"127.0.0.1\"\nhttp_server_port = \"7000\"\n\nsecret_key = { seed = \"${RANDOM}avail${RANDOM}\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://kate.avail.tools:443/ws\"]\napp_id = 0\nconfidence = 92.0\navail_path = \"${HOME}/.avail-light\"\nbootstraps = [[\"12D3KooWMm1c4pzeLPGkkCJMAgFbsfQ8xmVDusg272icWsaNHWzN\", \"/ip4/127.0.0.1/tcp/37000\"]]" >~/.avail/config.yml
+    echo "log_level = \"info\"\nhttp_server_host = \"0.0.0.0\"\nhttp_server_port = \"7000\"\n\nsecret_key = { seed = \"${RANDOM}avail${RANDOM}\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://kate.avail.tools:443/ws\"]\napp_id = 0\nconfidence = 99.0\navail_path = \"${HOME}/.avail-light\"\nbootstraps = [[\"12D3KooWMm1c4pzeLPGkkCJMAgFbsfQ8xmVDusg272icWsaNHWzN\", \"/ip4/127.0.0.1/tcp/37000\"]]" >~/.avail/config.yml
+fi
+if [ ! -d "${HOME}/.availup" ]; then
+    mkdir ~/.availup
 fi
 # check if avail-light binary is installed, if yes, just run it
 if command -v avail-light >/dev/null 2>&1; then
     echo "✅ Avail is already installed. Starting Avail with default config..."
     avail-light -c ~/.avail/config.yml
 fi
+ISCURL=command -v curl >/dev/null 2>&1;
+ISWGET=command -v wget >/dev/null 2>&1;
+# check if curl or wget is available, if not, throw error
+if [ "$ISCURL" = "1" ] && [ "$ISWGET" = "1" ]; then
+    echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
+    exit 1
+fi
 # check if environment is amd64 or aarch64, if neither throw error
 if [ "$(uname -m)" = "x86_64" ]; then
     # check if curl is available else use wget
     if command -v curl >/dev/null 2>&1; then
-        curl -sLO https://github.com/availproject/avail-light/releases/download/v1.6.0-rc1/avail-light-linux-amd64.tar.gz
+        curl -sLO https://github.com/availproject/avail-light/releases/download/v1.7.1/avail-light-linux-amd64.tar.gz
     elif command -v wget >/dev/null 2>&1; then
-        wget -qO- https://github.com/availproject/avail-light/releases/download/v1.6.0-rc1/avail-light-linux-amd64.tar.gz
+        wget -qO- https://github.com/availproject/avail-light/releases/download/v1.7.1/avail-light-linux-amd64.tar.gz
     else
         echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
         exit 1
@@ -33,9 +43,9 @@ if [ "$(uname -m)" = "x86_64" ]; then
 elif [ "$(uname -m)" = "arm64" -a "$(uname -s)" = "Darwin" ]; then
     # check if curl is available else use wget
     if command -v curl >/dev/null 2>&1; then
-        curl -sLO https://github.com/availproject/avail-light/releases/download/v1.6.0-rc1/avail-light-apple-arm64.tar.gz
+        curl -sLO https://github.com/availproject/avail-light/releases/download/v1.7.1/avail-light-apple-arm64.tar.gz
     elif command -v wget >/dev/null 2>&1; then
-        wget -qO- https://github.com/availproject/avail-light/releases/download/v1.6.0-rc1/avail-light-apple-arm64.tar.gz
+        wget -qO- https://github.com/availproject/avail-light/releases/download/v1.7.1/avail-light-apple-arm64.tar.gz
     else
         echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
         exit 1
@@ -48,9 +58,9 @@ elif [ "$(uname -m)" = "arm64" -a "$(uname -s)" = "Darwin" ]; then
 elif [ "$(uname -m)" = "aarch64" -o "$(uname -m)" = "arm64" ]; then
     # check if curl is available else use wget
     if command -v curl >/dev/null 2>&1; then
-        curl -sLO https://github.com/availproject/avail-light/releases/download/v1.6.0-rc1/avail-light-linux-aarch64.tar.gz
+        curl -sLO https://github.com/availproject/avail-light/releases/download/v1.7.1/avail-light-linux-aarch64.tar.gz
     elif command -v wget >/dev/null 2>&1; then
-        wget -qO- https://github.com/availproject/avail-light/releases/download/v1.6.0-rc1/avail-light-linux-aarch64.tar.gz
+        wget -qO- https://github.com/availproject/avail-light/releases/download/v1.7.1/avail-light-linux-aarch64.tar.gz
     else
         echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
         exit 1
