@@ -17,8 +17,8 @@ if command -v avail-light >/dev/null 2>&1; then
     echo "✅ Avail is already installed. Starting Avail with default config..."
     avail-light -c ~/.avail/config.yml
 fi
-ISCURL=command -v curl >/dev/null 2>&1;
-ISWGET=command -v wget >/dev/null 2>&1;
+ISCURL=command -v curl >/dev/null 2>&1
+ISWGET=command -v wget >/dev/null 2>&1
 # check if curl or wget is available, if not, throw error
 if [ "$ISCURL" = "1" ] && [ "$ISWGET" = "1" ]; then
     echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
