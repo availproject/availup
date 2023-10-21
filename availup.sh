@@ -28,6 +28,7 @@ elif [ "$(uname -m)" = "x86_64" -a "$(uname -s)" = "Darwin" ]; then
 elif [ "$(uname -m)" = "aarch64" -o "$(uname -m)" = "arm64" ]; then
     ARCH_STRING="linux-aarch64"
 fi
+VERSION="v1.7.3-rc1"
 if [ -z "$ARCH_STRING" ]; then
     echo "📥 No binary available for this architecture, building from source instead. This can take a while..."
     # check if cargo is not available, else attempt to install through rustup
@@ -40,18 +41,12 @@ if [ -z "$ARCH_STRING" ]; then
         echo "📦 Cargo is now available. Reattempting to build from source..."
     fi
     # check if avail-light folder exists in home directory, if yes, pull latest changes, else clone the repo
-    if [ -d "${HOME}/avail-light" ]; then
-        echo "📂 Avail-light is already cloned. Pulling latest changes..."
-        cd $HOME/avail-light
-        git pull
-    else
-        echo "📂 Avail-light is not cloned. Cloning..."
-        git clone -q --depth=1 --single-branch --branch=main https://github.com/availproject/avail-light.git $HOME/avail-light
-        cd $HOME/avail-light
-    fi
+    echo "📂 Cloning avail-light repository and building..."
+    git clone -q -c advice.detachedHead=false --depth=1 --single-branch --branch $VERSION https://github.com/availproject/avail-light.git $HOME/avail-light
+    cd $HOME/avail-light
     cargo install --locked --path . --bin avail-light
+    rm -rf $HOME/avail-light
 else
-    VERSION="v1.7.3-rc1"
     if command -v curl >/dev/null 2>&1; then
         curl -sLO https://github.com/availproject/avail-light/releases/download/$VERSION/avail-light-$ARCH_STRING.tar.gz
     elif command -v wget >/dev/null 2>&1; then
