@@ -58,6 +58,12 @@ else
     # use tar to extract the downloaded file and move it to /usr/local/bin
     tar -xzf avail-light-$ARCH_STRING.tar.gz
     chmod +x avail-light-$ARCH_STRING
+    if [ ! -d "/usr/local" ]; then
+        sudo mkdir /usr/local
+    fi
+    if [ ! -d "/usr/local/bin" ]; then
+        sudo mkdir /usr/local/bin
+    fi
     sudo mv avail-light-$ARCH_STRING /usr/local/bin/avail-light
     rm avail-light-$ARCH_STRING.tar.gz
 fi
