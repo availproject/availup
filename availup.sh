@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 echo "🆙 Starting Availup..."
 while [ $# -gt 0 ]; do
     if [[ $1 == "--"* ]]; then
@@ -15,10 +16,10 @@ else
 fi
 if [ "$NETWORK" = "goldberg" ]; then
     echo "📌 Goldberg network selected."
-    VERSION="v1.7.3-rc1"
+    VERSION="v1.7.3"
 elif [ "$NETWORK" = "kate" ]; then
     echo "📌 Kate network selected."
-    VERSION="v1.7.3"
+    VERSION="v1.7.3-rc1"
 elif [ "$NETWORK" = "local" ]; then
     echo "📌 Local network selected."
     VERSION="v1.7.3"
@@ -43,8 +44,8 @@ if [ -z "$config" ]; then
     CONFIG="$HOME/.avail/$NETWORK/config.yml"
     touch $CONFIG
     if [ "$NETWORK" = "goldberg" ]; then
-        echo "log_level = \"info\"\nhttp_server_host = \"0.0.0.0\"\nhttp_server_port = 7001\n\nsecret_key = { seed = \"$RANDOM-avail-$RANDOM\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://goldberg.avail.tools:443/ws\"]\napp_id = 0\nconfidence = 99.0\navail_path = \"$HOME/.avail-light/$NETWORK\"\nbootstraps = [[\"12D3KooWStAKPADXqJ7cngPYXd2mSANpdgh1xQ34aouufHA2xShz\", \"/ip4/127.0.0.1/tcp/39000\"]]" >~/.avail/$NETWORK/config.yml
-    elif [ "$NETWORK" = "goldberg" ]; then
+        echo "log_level = \"info\"\nhttp_server_host = \"0.0.0.0\"\nhttp_server_port = 7001\n\nsecret_key = { seed = \"$RANDOM-avail-$RANDOM\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://goldberg.avail.tools:443/ws\"]\napp_id = 0\nconfidence = 99.0\navail_path = \"$HOME/.avail-light/$NETWORK\"\nbootstraps = [[\"12D3KooWBkLsNGaD3SpMaRWtAmWVuiZg1afdNSPbtJ8M8r9ArGRT\",\"/dns/bootnode.1.lightclient.goldberg.avail.tools/udp/37000/quic-v1\"]]" >~/.avail/$NETWORK/config.yml
+    elif [ "$NETWORK" = "kate" ]; then
         echo "log_level = \"info\"\nhttp_server_host = \"0.0.0.0\"\nhttp_server_port = 7001\n\nsecret_key = { seed = \"$RANDOM-avail-$RANDOM\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://kate.avail.tools:443/ws\"]\napp_id = 0\nconfidence = 99.0\navail_path = \"$HOME/.avail-light/$NETWORK\"\nbootstraps = [\"/ip4/127.0.0.1/tcp/39000/quic-v1/12D3KooWMm1c4pzeLPGkkCJMAgFbsfQ8xmVDusg272icWsaNHWzN\"]" >~/.avail/$NETWORK/config.yml
     fi
 else 
@@ -59,6 +60,7 @@ if command -v avail-light >/dev/null 2>&1; then
     echo "✅ Avail is already installed. Starting Avail with default config..."
     trap onexit EXIT
     avail-light -c $CONFIG
+    exit 0
 fi
 if [ "$(uname -m)" = "x86_64" ]; then
     ARCH_STRING="linux-amd64"
