@@ -16,16 +16,22 @@ else
 fi
 if [ "$NETWORK" = "goldberg" ]; then
     echo "📌 Goldberg network selected."
-    VERSION="v1.7.3"
+    VERSION="v1.7.4"
 elif [ "$NETWORK" = "kate" ]; then
     echo "📌 Kate network selected."
-    VERSION="v1.7.3-rc1"
+    VERSION="v1.7.4"
 elif [ "$NETWORK" = "local" ]; then
     echo "📌 Local network selected."
-    VERSION="v1.7.3"
+    VERSION="v1.7.4"
 else
     echo "🚫 Invalid network selected. Please select one of the following: goldberg, kate, local."
     exit 1
+fi
+if [ -z "$app_id" ]; then
+    echo "ℹ️ No app ID specified. Defaulting to 0."
+    APPID="0"
+else 
+    APPID="$app_id"
 fi
 if [ ! -d "$HOME/.avail" ]; then
     mkdir $HOME/.avail
@@ -43,10 +49,11 @@ if [ -z "$config" ]; then
     echo "ℹ️ No config file selected. Defaulting to $HOME/.avail/$NETWORK/config.yml."
     CONFIG="$HOME/.avail/$NETWORK/config.yml"
     touch $CONFIG
+    SEED=$(hexdump -vn32 -e'8/8 "%0X"' /dev/urandom)
     if [ "$NETWORK" = "goldberg" ]; then
-        echo "log_level = \"info\"\nhttp_server_host = \"0.0.0.0\"\nhttp_server_port = 7001\n\nsecret_key = { seed = \"$RANDOM-avail-$RANDOM\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://goldberg.avail.tools:443/ws\"]\napp_id = 0\nconfidence = 99.0\navail_path = \"$HOME/.avail-light/$NETWORK\"\nbootstraps = [[\"12D3KooWBkLsNGaD3SpMaRWtAmWVuiZg1afdNSPbtJ8M8r9ArGRT\",\"/dns/bootnode.1.lightclient.goldberg.avail.tools/udp/37000/quic-v1\"]]" >~/.avail/$NETWORK/config.yml
+        echo "log_level = \"info\"\nhttp_server_host = \"0.0.0.0\"\nhttp_server_port = 7001\n\nsecret_key = { seed = \"$SEED\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://goldberg.avail.tools:443/ws\"]\napp_id = $APPID\nconfidence = 99.0\navail_path = \"$HOME/.avail-light/$NETWORK\"\nbootstraps = [[\"12D3KooWBkLsNGaD3SpMaRWtAmWVuiZg1afdNSPbtJ8M8r9ArGRT\",\"/dns/bootnode.1.lightclient.goldberg.avail.tools/udp/37000/quic-v1\"]]" >~/.avail/$NETWORK/config.yml
     elif [ "$NETWORK" = "kate" ]; then
-        echo "log_level = \"info\"\nhttp_server_host = \"0.0.0.0\"\nhttp_server_port = 7001\n\nsecret_key = { seed = \"$RANDOM-avail-$RANDOM\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://kate.avail.tools:443/ws\"]\napp_id = 0\nconfidence = 99.0\navail_path = \"$HOME/.avail-light/$NETWORK\"\nbootstraps = [\"/ip4/127.0.0.1/tcp/39000/quic-v1/12D3KooWMm1c4pzeLPGkkCJMAgFbsfQ8xmVDusg272icWsaNHWzN\"]" >~/.avail/$NETWORK/config.yml
+        echo "log_level = \"info\"\nhttp_server_host = \"0.0.0.0\"\nhttp_server_port = 7001\n\nsecret_key = { seed = \"$SEED\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://kate.avail.tools:443/ws\"]\napp_id = $APPID\nconfidence = 99.0\navail_path = \"$HOME/.avail-light/$NETWORK\"\nbootstraps = [\"/ip4/127.0.0.1/tcp/39000/quic-v1/12D3KooWMm1c4pzeLPGkkCJMAgFbsfQ8xmVDusg272icWsaNHWzN\"]" >~/.avail/$NETWORK/config.yml
     fi
 else 
     CONFIG=$config
