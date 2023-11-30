@@ -31,3 +31,12 @@ rm ~/.avail/goldberg/config.yml
 # and rerunning the script with flags:
 curl -sL1 avail.sh | sh -s -- --app_id 1
 ```
+
+To upgrade the light client to a latest version, you need to delete the binary:
+```bash
+sudo rm /usr/local/bin/avail-light
+# in some cases, the config can be persisted, if older config is incompatible, then delete it first:
+rm ~/.avail/goldberg/config.yml
+# then, rerun the script:
+curl -sL1 avail.sh | sh
+```
