@@ -49,7 +49,12 @@ if [ -z "$config" ]; then
     echo "ℹ️ No config file selected. Defaulting to $HOME/.avail/$NETWORK/config.yml."
     CONFIG="$HOME/.avail/$NETWORK/config.yml"
     touch $CONFIG
-    SEED=$(hexdump -vn32 -e'8/8 "%0X"' /dev/urandom)
+    if command -v hexdump >/dev/null 2>&1; then
+        echo "🔐 Generating random seed..."
+        SEED=$(hexdump -vn32 -e'8/8 "%0X"' /dev/urandom)
+    else
+        SEED="$RANDOM$RANDOM-avail-$RANDOM$RANDOM"
+    fi
     if [ "$NETWORK" = "goldberg" ]; then
         echo "log_level = \"info\"\nhttp_server_host = \"0.0.0.0\"\nhttp_server_port = 7001\n\nsecret_key = { seed = \"$SEED\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://goldberg.avail.tools:443/ws\"]\napp_id = $APPID\nconfidence = 99.0\navail_path = \"$HOME/.avail-light/$NETWORK\"\nbootstraps = [[\"12D3KooWBkLsNGaD3SpMaRWtAmWVuiZg1afdNSPbtJ8M8r9ArGRT\",\"/dns/bootnode.1.lightclient.goldberg.avail.tools/udp/37000/quic-v1\"]]" >~/.avail/$NETWORK/config.yml
     elif [ "$NETWORK" = "kate" ]; then
