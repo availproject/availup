@@ -8,6 +8,16 @@ while [ $# -gt 0 ]; do
     fi
     shift
 done
+if [ -f "$HOME/.bashrc" ]; then
+    PROFILE="$HOME/.bashrc"
+elif [ -f "$HOME/.zshrc" ]; then
+    PROFILE="$HOME/.zshrc"
+elif [ -f "$HOME/.kshrc" ]; then
+    PROFILE="$HOME/.kshrc"
+else
+    echo "🫣 Unable to locate a profile, availup might not work as intended!"
+    PROFILE="/etc/profile"
+fi
 if [ -z "$network" ]; then
     echo "ℹ️ No network selected. Defaulting to goldberg."
     NETWORK="goldberg"
@@ -16,13 +26,13 @@ else
 fi
 if [ "$NETWORK" = "goldberg" ]; then
     echo "📌 Goldberg network selected."
-    VERSION="v1.7.4"
+    VERSION="v1.7.9"
 elif [ "$NETWORK" = "kate" ]; then
     echo "📌 Kate network selected."
-    VERSION="v1.7.4"
+    VERSION="v1.7.9"
 elif [ "$NETWORK" = "local" ]; then
     echo "📌 Local network selected."
-    VERSION="v1.7.4"
+    VERSION="v1.7.9"
 else
     echo "🚫 Invalid network selected. Please select one of the following: goldberg, kate, local."
     exit 1
@@ -33,12 +43,6 @@ if [ -z "$app_id" ]; then
 else 
     APPID="$app_id"
 fi
-if [ ! -d "$HOME/.avail" ]; then
-    mkdir $HOME/.avail
-fi
-if [ ! -d "$HOME/.avail/$NETWORK" ]; then
-    mkdir $HOME/.avail/$NETWORK
-fi
 if [ ! -d "$HOME/.avail-light" ]; then
     mkdir $HOME/.avail-light
 fi
@@ -46,32 +50,26 @@ if [ ! -d "$HOME/.avail-light/$NETWORK" ]; then
     mkdir $HOME/.avail-light/$NETWORK
 fi
 if [ -z "$config" ]; then
-    echo "ℹ️ No config file selected. Defaulting to $HOME/.avail/$NETWORK/config.yml."
-    CONFIG="$HOME/.avail/$NETWORK/config.yml"
-    touch $CONFIG
-    if command -v hexdump >/dev/null 2>&1; then
-        echo "🔐 Generating random seed..."
-        SEED=$(hexdump -vn32 -e'8/8 "%0X"' /dev/urandom)
-    else
-        SEED="$RANDOM$RANDOM-avail-$RANDOM$RANDOM"
-    fi
-    if [ "$NETWORK" = "goldberg" ]; then
-        echo "log_level = \"info\"\nhttp_server_host = \"0.0.0.0\"\nhttp_server_port = 7001\n\nsecret_key = { seed = \"$SEED\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://goldberg.avail.tools:443/ws\"]\napp_id = $APPID\nconfidence = 99.0\navail_path = \"$HOME/.avail-light/$NETWORK\"\nbootstraps = [[\"12D3KooWBkLsNGaD3SpMaRWtAmWVuiZg1afdNSPbtJ8M8r9ArGRT\",\"/dns/bootnode.1.lightclient.goldberg.avail.tools/udp/37000/quic-v1\"]]" >~/.avail/$NETWORK/config.yml
-    elif [ "$NETWORK" = "kate" ]; then
-        echo "log_level = \"info\"\nhttp_server_host = \"0.0.0.0\"\nhttp_server_port = 7001\n\nsecret_key = { seed = \"$SEED\" }\nlibp2p_port = \"37000\"\nfull_node_ws = [\"wss://kate.avail.tools:443/ws\"]\napp_id = $APPID\nconfidence = 99.0\navail_path = \"$HOME/.avail-light/$NETWORK\"\nbootstraps = [\"/ip4/127.0.0.1/tcp/39000/quic-v1/12D3KooWMm1c4pzeLPGkkCJMAgFbsfQ8xmVDusg272icWsaNHWzN\"]" >~/.avail/$NETWORK/config.yml
-    fi
+    echo "ℹ️ No config file selected. Defaulting to $NETWORK config..."
 else 
     CONFIG=$config
 fi
 onexit() {
-    echo "🔄 Avail stopped. Future instances of the light client can be started by invoking avail-light -c \$HOME/.avail/$NETWORK/config.yml$EXTRAPROMPT"
+    echo "🔄 Avail stopped. Future instances of the light client can be started by invoking the avail-light binary directly$EXTRAPROMPT"
+    if [[ ":$PATH:" != *":$HOME/.availup:"* ]]; then
+        echo "📌 Adding Avail to your path. Please run the following command to load it in the current terminal session:\nsource $PROFILE"
+        echo "export PATH=\$PATH:$HOME/.availup" >> $PROFILE
+    fi
     exit 0
 }
-# check if avail-light binary is installed, if yes, just run it
 if command -v avail-light >/dev/null 2>&1; then
-    echo "✅ Avail is already installed. Starting Avail with default config..."
+    echo "✅ Avail is already installed. Starting Avail..."
     trap onexit EXIT
-    avail-light -c $CONFIG
+    if [ -z "$config" ]; then
+        $HOME/.availup/avail-light --network $NETWORK --app-id $APPID
+    else
+        $HOME/.availup/avail-light --config $CONFIG --app-id $APPID
+    fi
     exit 0
 fi
 if [ "$(uname -m)" = "x86_64" ]; then
@@ -112,16 +110,17 @@ else
     # use tar to extract the downloaded file and move it to /usr/local/bin
     tar -xzf avail-light-$ARCH_STRING.tar.gz
     chmod +x avail-light-$ARCH_STRING
-    if [ ! -d "/usr/local" ]; then
-        sudo mkdir /usr/local
+    if [ ! -d "$HOME/.availup" ]; then
+        sudo mkdir $HOME/.availup
     fi
-    if [ ! -d "/usr/local/bin" ]; then
-        sudo mkdir /usr/local/bin
-    fi
-    sudo mv avail-light-$ARCH_STRING /usr/local/bin/avail-light
+    sudo mv avail-light-$ARCH_STRING $HOME/.availup/avail-light
     rm avail-light-$ARCH_STRING.tar.gz
 fi
 echo "✅ Availup exited successfully."
 echo "🧱 Starting Avail."
 trap onexit EXIT
-avail-light -c $CONFIG
+if [ -z "$config" ]; then
+    $HOME/.availup/avail-light --network $NETWORK --app-id $APPID
+else
+    $HOME/.availup/avail-light --config $CONFIG --app-id $APPID
+fi
