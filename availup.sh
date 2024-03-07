@@ -44,7 +44,12 @@ else
     APPID="$app_id"
 fi
 if [ -z "$identity" ]; then
-    echo "🤷 No identity set. This will be automatically generated at startup."
+    if [ -f "$HOME/.availup/identity.toml" ]; then
+        IDENTITY=$HOME/.availup/identity.toml
+        echo "🔑 Identity found at $IDENTITY."
+    else 
+        echo "🤷 No identity set. This will be automatically generated at startup."
+    fi
 else 
     IDENTITY="$identity"
 fi
@@ -127,9 +132,9 @@ else
     tar -xzf avail-light-$ARCH_STRING.tar.gz
     chmod +x avail-light-$ARCH_STRING
     if [ ! -d "$HOME/.availup" ]; then
-        sudo mkdir $HOME/.availup
+        mkdir $HOME/.availup
     fi
-    sudo mv avail-light-$ARCH_STRING $HOME/.availup/avail-light
+    mv avail-light-$ARCH_STRING $HOME/.availup/avail-light
     rm avail-light-$ARCH_STRING.tar.gz
 fi
 echo "✅ Availup exited successfully."
