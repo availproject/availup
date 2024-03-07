@@ -15,28 +15,26 @@ Currently available flags are:
 * `network`: can be one of the following: [`kate`, `goldberg`, `local`]
 * `config`: path to the configuration file, availup will generate a config if this flag is not specified
 * `app_id`: application ID to run the light client (defaults to `0`)
-
-Flags are defined once for each network in the config file. If a default configuration already exists, the flags are
-ignored unless the configuration for that network does not exist.
+* `upgrade`: takes `y` and `yes` as valid arguments, indicating that the `avail-light` binary should be upgraded
 
 You can modify the existing default config by running and rerun `availup` to use the new config:
 ```bash
-nano ~/.avail/goldberg/config.yml
+# create the config:
+touch ~/config.yml
+# edit the config:
+nano ~/config.yml
 # and rerunning the script:
-curl -sL1 avail.sh | sh
+curl -sL1 avail.sh | sh -s -- --config ~/config.yml
 ```
-Alternatively, you can delete the existing config and generate a new config with `availup`:
+
+Alternatively, you can pass a specific application ID with `availup`:
 ```bash
 rm ~/.avail/goldberg/config.yml
 # and rerunning the script with flags:
 curl -sL1 avail.sh | sh -s -- --app_id 1
 ```
 
-To upgrade the light client to a latest version, you need to delete the binary:
+To upgrade the light client to a latest version, you can simply pass the `--upgrade` flag like:
 ```bash
-sudo rm /usr/local/bin/avail-light
-# in some cases, the config can be persisted, if older config is incompatible, then delete it first:
-rm ~/.avail/goldberg/config.yml
-# then, rerun the script:
-curl -sL1 avail.sh | sh
+curl -sL1 avail.sh | sh -s -- --upgrade y
 ```
