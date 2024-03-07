@@ -81,7 +81,7 @@ if [ "$UPGRADE" = 1 ]; then
         sudo rm $HOME/.availup/avail-light
     else
         echo "🤔 Avail was not installed with availup. Attemping to uninstall with cargo..."
-        cargo uninstall avail-light
+        cargo uninstall avail-light || echo "👀 Avail was not installed with cargo, upgrade might not be required!"
         if command -v avail-light >/dev/null 2>&1; then
             echo "🚫 Avail was not uninstalled. Please uninstall manually and try again."
             exit 1
