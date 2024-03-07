@@ -81,9 +81,9 @@ if [ command -v avail-light >/dev/null 2>&1 ] && [ "$UPGRADE" = 0 ]; then
     exit 0
 fi
 if [ "$UPGRADE" = 1 ]; then
-    echo "🔄 Upgrading Avail. This step might prompt for a password."
+    echo "🔄 Upgrading Avail..."
     if [ -f "$HOME/.availup/avail-light" ]; then
-        sudo rm $HOME/.availup/avail-light
+        rm $HOME/.availup/avail-light
     else
         echo "🤔 Avail was not installed with availup. Attemping to uninstall with cargo..."
         cargo uninstall avail-light || echo "👀 Avail was not installed with cargo, upgrade might not be required!"
