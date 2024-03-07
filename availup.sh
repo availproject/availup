@@ -15,11 +15,11 @@ elif [ -f "$HOME/.zshrc" ]; then
 elif [ -f "$HOME/.kshrc" ]; then
     PROFILE="$HOME/.kshrc"
 else
-    echo "🫣 Unable to locate a profile, availup might not work as intended!"
+    echo "🫣 Unable to locate a shell rc file, using POSIX default, availup might not work as intended!"
     PROFILE="/etc/profile"
 fi
 if [ -z "$network" ]; then
-    echo "ℹ️ No network selected. Defaulting to goldberg."
+    echo "🛜  No network selected. Defaulting to goldberg."
     NETWORK="goldberg"
 else 
     NETWORK="$network"
@@ -38,39 +38,55 @@ else
     exit 1
 fi
 if [ -z "$app_id" ]; then
-    echo "ℹ️ No app ID specified. Defaulting to 0."
+    echo "📲 No app ID specified. Defaulting to 0."
     APPID="0"
 else 
     APPID="$app_id"
 fi
-if [ ! -d "$HOME/.avail-light" ]; then
-    mkdir $HOME/.avail-light
-fi
-if [ ! -d "$HOME/.avail-light/$NETWORK" ]; then
-    mkdir $HOME/.avail-light/$NETWORK
-fi
-if [ -z "$config" ]; then
-    echo "ℹ️ No config file selected. Defaulting to $NETWORK config..."
+if [ -z "$identity" ]; then
+    echo "🤷 No identity set. This will be automatically generated at startup."
 else 
-    CONFIG=$config
+    IDENTITY="$identity"
+fi
+if [ "$upgrade" == "y" ] || [ "$upgrade" == "yes" ]; then
+    UPGRADE=1
+else 
+    UPGRADE=0
 fi
 onexit() {
     echo "🔄 Avail stopped. Future instances of the light client can be started by invoking the avail-light binary directly$EXTRAPROMPT"
     if [[ ":$PATH:" != *":$HOME/.availup:"* ]]; then
-        echo "📌 Adding Avail to your path. Please run the following command to load it in the current terminal session:\nsource $PROFILE"
-        echo "export PATH=\$PATH:$HOME/.availup" >> $PROFILE
+        echo "\nexport PATH=\$PATH:$HOME/.availup" >> $PROFILE
+        echo "📌 Avail has been added to your profile. Please run the following command to load it in the current terminal session:\nsource $PROFILE\n👉 Alternatively, you can add it for this session by running the following command:\nexport PATH=\$PATH:$HOME/.availup"
     fi
     exit 0
 }
-if command -v avail-light >/dev/null 2>&1; then
+if [ command -v avail-light >/dev/null 2>&1 ] && [ "$UPGRADE" = 0 ]; then
     echo "✅ Avail is already installed. Starting Avail..."
     trap onexit EXIT
-    if [ -z "$config" ]; then
+    if [ -z "$config" ] && [ ! -z "$identity" ]; then
+        $HOME/.availup/avail-light --network $NETWORK --app-id $APPID --identity $IDENTITY
+    elif [ -z "$config" ]; then
         $HOME/.availup/avail-light --network $NETWORK --app-id $APPID
+    elif [ ! -z "$config" ] && [ ! -z "$identity" ]; then
+        $HOME/.availup/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
     else
         $HOME/.availup/avail-light --config $CONFIG --app-id $APPID
     fi
     exit 0
+fi
+if [ "$UPGRADE" = 1 ]; then
+    echo "🔄 Upgrading Avail. This step might prompt for a password."
+    if [ -f "$HOME/.availup/avail-light" ]; then
+        sudo rm $HOME/.availup/avail-light
+    else
+        echo "🤔 Avail was not installed with availup. Attemping to uninstall with cargo..."
+        cargo uninstall avail-light
+        if command -v avail-light >/dev/null 2>&1; then
+            echo "🚫 Avail was not uninstalled. Please uninstall manually and try again."
+            exit 1
+        fi
+    fi
 fi
 if [ "$(uname -m)" = "x86_64" ]; then
     ARCH_STRING="linux-amd64"
@@ -119,8 +135,12 @@ fi
 echo "✅ Availup exited successfully."
 echo "🧱 Starting Avail."
 trap onexit EXIT
-if [ -z "$config" ]; then
+if [ -z "$config" ] && [ ! -z "$identity" ]; then
+    $HOME/.availup/avail-light --network $NETWORK --app-id $APPID --identity $IDENTITY
+elif [ -z "$config" ]; then
     $HOME/.availup/avail-light --network $NETWORK --app-id $APPID
+elif [ ! -z "$config" ] && [ ! -z "$identity" ]; then
+    $HOME/.availup/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
 else
     $HOME/.availup/avail-light --config $CONFIG --app-id $APPID
 fi
