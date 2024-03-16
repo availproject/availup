@@ -93,14 +93,14 @@ if [ "$UPGRADE" = 1 ]; then
         fi
     fi
 fi
-if [ "$(uname -m)" = "x86_64" ]; then
-    ARCH_STRING="linux-amd64"
-elif [ "$(uname -m)" = "arm64" -a "$(uname -s)" = "Darwin" ]; then
+if [ "$(uname -m)" = "arm64" -a "$(uname -s)" = "Darwin" ]; then
     ARCH_STRING="apple-arm64"
 elif [ "$(uname -m)" = "x86_64" -a "$(uname -s)" = "Darwin" ]; then
     ARCH_STRING="apple-x86_64"
 elif [ "$(uname -m)" = "aarch64" -o "$(uname -m)" = "arm64" ]; then
     ARCH_STRING="linux-aarch64"
+elif [ "$(uname -m)" = "x86_64" ]; then
+    ARCH_STRING="linux-amd64"
 fi
 if [ -z "$ARCH_STRING" ]; then
     echo "📥 No binary available for this architecture, building from source instead. This can take a while..."
