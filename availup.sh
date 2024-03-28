@@ -1,21 +1,43 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 echo "🆙 Starting Availup..."
 while [ $# -gt 0 ]; do
-    if [[ $1 == "--"* ]]; then
+    if [[ $1 = "--"* ]]; then
         v="${1/--/}"
         declare "$v"="$2"
         shift
     fi
     shift
 done
-if [ -f "$HOME/.bashrc" ]; then
-    PROFILE="$HOME/.bashrc"
-elif [ -f "$HOME/.zshrc" ]; then
-    PROFILE="$HOME/.zshrc"
-elif [ -f "$HOME/.kshrc" ]; then
-    PROFILE="$HOME/.kshrc"
+# check if bash is current terminal shell, else check for zsh
+if [ -z "$BASH_VERSION" ]; then
+    if [ -z "$ZSH_VERSION" ]; then
+        echo "🚫 Unable to locate a shell. Availup might not work as intended!"
+    else 
+        CURRENT_TERM="zsh"
+    fi
 else
-    echo "🫣 Unable to locate a shell rc file, using POSIX default, availup might not work as intended!"
+    CURRENT_TERM="bash"
+fi
+if [ "$CURRENT_TERM" = "bash" -a -f "$HOME/.bashrc" ]; then
+    PROFILE="$HOME/.bashrc"
+elif [ "$CURRENT_TERM" = "bash" -a -f "$HOME/.bash_profile" ]; then
+    PROFILE="$HOME/.bash_profile"
+elif [ "$CURRENT_TERM" = "bash" -a -f "$HOME/.zshrc" ]; then
+    PROFILE="$HOME/.zshrc"
+elif [ "$CURRENT_TERM" = "bash" -a -f "$HOME/.zsh_profile" ]; then
+    PROFILE="$HOME/.zsh_profile"
+elif [ "$CURRENT_TERM" = "zsh" -a -f "$HOME/.zshrc" ]; then
+    PROFILE="$HOME/.zshrc"
+elif [ "$CURRENT_TERM" = "zsh" -a -f "$HOME/.zsh_profile" ]; then
+    PROFILE="$HOME/.zsh_profile"
+elif [ "$CURRENT_TERM" = "bash" ]; then
+    PROFILE="$HOME/.bashrc"
+    touch $HOME/.bashrc
+elif [ "$CURRENT_TERM" = "zsh" ]; then
+    PROFILE="$HOME/.zshrc"
+    touch $HOME/.zshrc
+else
+    echo "🫣 Unable to locate a compatible shell or rc file, using POSIX default, availup might not work as intended!"
     PROFILE="/etc/profile"
 fi
 if [ -z "$network" ]; then
@@ -26,9 +48,6 @@ else
 fi
 if [ "$NETWORK" = "goldberg" ]; then
     echo "📌 Goldberg network selected."
-    VERSION="v1.7.9"
-elif [ "$NETWORK" = "kate" ]; then
-    echo "📌 Kate network selected."
     VERSION="v1.7.9"
 elif [ "$NETWORK" = "local" ]; then
     echo "📌 Local network selected."
@@ -44,8 +63,8 @@ else
     APPID="$app_id"
 fi
 if [ -z "$identity" ]; then
-    if [ -f "$HOME/.availup/identity.toml" ]; then
-        IDENTITY=$HOME/.availup/identity.toml
+    IDENTITY=$HOME/.avail/identity/identity.toml
+    if [ -f "$HOME/.avail/identity/identity.toml" ]; then
         echo "🔑 Identity found at $IDENTITY."
     else 
         echo "🤷 No identity set. This will be automatically generated at startup."
@@ -53,37 +72,64 @@ if [ -z "$identity" ]; then
 else 
     IDENTITY="$identity"
 fi
-if [ "$upgrade" == "y" ] || [ "$upgrade" == "yes" ]; then
-    UPGRADE=1
-else 
-    UPGRADE=0
+if [ ! -d "$HOME/.avail" ]; then
+    mkdir $HOME/.avail
 fi
+if [ ! -d "$HOME/.avail/bin" ]; then
+    mkdir $HOME/.avail/bin
+fi
+if [ ! -d "$HOME/.avail/identity" ]; then
+    mkdir $HOME/.avail/identity
+fi
+# check if avail-light version matches!
+UPGRADE=0
+if [ ! -z "$upgrade" ]; then
+    echo "🔄 Checking for updates..."
+    if command -v avail-light >/dev/null 2>&1; then
+        CURRENT_VERSION="v$(avail-light --version | cut -d " " -f 2)"
+        if [ "$CURRENT_VERSION" = "v1.7.8" ] && [ "$VERSION" = "v1.7.9" ]; then
+            UPGRADE=0
+            echo "✨ Avail binary is up to date. Skipping upgrade."
+        elif [ "$CURRENT_VERSION" != "$VERSION" ]; then
+            UPGRADE=1
+            echo "✨ Avail binary is up to date. Skipping upgrade."
+        else
+            if [ "$upgrade" = "y" ] || [ "$upgrade" = "yes" ]; then
+                UPGRADE=1
+            fi
+        fi
+    fi
+fi
+
 onexit() {
-    echo "🔄 Avail stopped. Future instances of the light client can be started by invoking the avail-light binary directly$EXTRAPROMPT"
-    if [[ ":$PATH:" != *":$HOME/.availup:"* ]]; then
-        echo "\nexport PATH=\$PATH:$HOME/.availup" >> $PROFILE
-        echo "📌 Avail has been added to your profile. Please run the following command to load it in the current terminal session:\nsource $PROFILE\n👉 Alternatively, you can add it for this session by running the following command:\nexport PATH=\$PATH:$HOME/.availup"
+    echo "🔄 Avail stopped. Future instances of the light client can be started by invoking the avail-light binary or rerunning this script$EXTRAPROMPT"
+    if [[ ":$PATH:" != *":$HOME/.avail/bin:"* ]]; then
+        if ! grep -q "export PATH=\"\$PATH:$HOME/.avail/bin\"" "$PROFILE"; then
+            echo -e "export PATH=\"\$PATH:$HOME/.avail/bin\"\n" >> $PROFILE
+        fi
+        echo -e "📌 Avail has been added to your profile. Run the following command to load it in the current terminal session:\n. $PROFILE\n"
     fi
     exit 0
 }
-if [ command -v avail-light >/dev/null 2>&1 ] && [ "$UPGRADE" = 0 ]; then
+# check if avail-light binary is available and check if upgrade variable is set to 0
+if command -v avail-light >/dev/null 2>&1 && [ "$UPGRADE" = 0 ]; then
     echo "✅ Avail is already installed. Starting Avail..."
     trap onexit EXIT
     if [ -z "$config" ] && [ ! -z "$identity" ]; then
-        $HOME/.availup/avail-light --network $NETWORK --app-id $APPID --identity $IDENTITY
+        $HOME/.avail/bin/avail-light --network $NETWORK --app-id $APPID --identity $IDENTITY
     elif [ -z "$config" ]; then
-        $HOME/.availup/avail-light --network $NETWORK --app-id $APPID
+        $HOME/.avail/bin/avail-light --network $NETWORK --app-id $APPID
     elif [ ! -z "$config" ] && [ ! -z "$identity" ]; then
-        $HOME/.availup/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
+        $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
     else
-        $HOME/.availup/avail-light --config $CONFIG --app-id $APPID
+        $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID
     fi
     exit 0
 fi
 if [ "$UPGRADE" = 1 ]; then
     echo "🔄 Upgrading Avail..."
-    if [ -f "$HOME/.availup/avail-light" ]; then
-        rm $HOME/.availup/avail-light
+    if [ -f "$HOME/.avail/bin/avail-light" ]; then
+        rm $HOME/.avail/bin/avail-light
     else
         echo "🤔 Avail was not installed with availup. Attemping to uninstall with cargo..."
         cargo uninstall avail-light || echo "👀 Avail was not installed with cargo, upgrade might not be required!"
@@ -131,21 +177,18 @@ else
     # use tar to extract the downloaded file and move it to /usr/local/bin
     tar -xzf avail-light-$ARCH_STRING.tar.gz
     chmod +x avail-light-$ARCH_STRING
-    if [ ! -d "$HOME/.availup" ]; then
-        mkdir $HOME/.availup
-    fi
-    mv avail-light-$ARCH_STRING $HOME/.availup/avail-light
+    mv avail-light-$ARCH_STRING $HOME/.avail/bin/avail-light
     rm avail-light-$ARCH_STRING.tar.gz
 fi
 echo "✅ Availup exited successfully."
 echo "🧱 Starting Avail."
 trap onexit EXIT
 if [ -z "$config" ] && [ ! -z "$identity" ]; then
-    $HOME/.availup/avail-light --network $NETWORK --app-id $APPID --identity $IDENTITY
+    $HOME/.avail/bin/avail-light --network $NETWORK --app-id $APPID --identity $IDENTITY
 elif [ -z "$config" ]; then
-    $HOME/.availup/avail-light --network $NETWORK --app-id $APPID
+    $HOME/.avail/bin/avail-light --network $NETWORK --app-id $APPID
 elif [ ! -z "$config" ] && [ ! -z "$identity" ]; then
-    $HOME/.availup/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
+    $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
 else
-    $HOME/.availup/avail-light --config $CONFIG --app-id $APPID
+    $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID
 fi
