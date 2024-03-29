@@ -73,9 +73,9 @@ if [ "$NETWORK" = "goldberg" ]; then
             echo "📄 Configuration file found at $CONFIG."
         else
             echo "🤷 No configuration file set. This will be automatically generated at startup."
-            touch $CONFIG
-            echo -e $CONFIG_PARAMS >>$CONFIG
         fi
+        touch $CONFIG
+        echo -e $CONFIG_PARAMS >> $CONFIG
     else
         CONFIG="$config"
     fi
