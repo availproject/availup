@@ -28,7 +28,7 @@ fi
 if [ -z "$BASH_VERSION" ]; then
     if [ -z "$ZSH_VERSION" ]; then
         echo "🚫 Unable to locate a shell. Availup might not work as intended!"
-    else 
+    else
         CURRENT_TERM="zsh"
     fi
 else
@@ -59,7 +59,7 @@ fi
 if [ -z "$network" ]; then
     echo "🛜  No network selected. Defaulting to goldberg testnet."
     NETWORK="goldberg"
-else 
+else
     NETWORK="$network"
 fi
 CONFIG_PARAMS="bootstraps=['/dns/bootnode.1.lightclient.goldberg.avail.tools/tcp/37000/p2p/12D3KooWBkLsNGaD3SpMaRWtAmWVuiZg1afdNSPbtJ8M8r9ArGRT','/dns/bootnode.2.lightclient.goldberg.avail.tools/tcp/37000/p2p/12D3KooWRCgfvaLSnQfkwGehrhSNpY7i5RenWKL2ARst6ZqgdZZd']\nfull_node_ws=['wss://rpc-goldberg.sandbox.avail.tools:443','wss://goldberg-rpc.fra.avail.tools:443']\nconfidence=99.0\navail_path='$HOME/.avail/data'\nrecord_ttl=43200\n"
@@ -68,13 +68,13 @@ if [ "$NETWORK" = "goldberg" ]; then
     echo "📌 Goldberg testnet selected."
     VERSION="v1.7.9"
     if [ -z "$config" ]; then
-    CONFIG="$HOME/.avail/config/config.yml"
+        CONFIG="$HOME/.avail/config/config.yml"
         if [ -f "$CONFIG" ]; then
             echo "📄 Configuration file found at $CONFIG."
-        else 
+        else
             echo "🤷 No configuration file set. This will be automatically generated at startup."
             touch $CONFIG
-            echo -e $CONFIG_PARAMS >> $CONFIG
+            echo -e $CONFIG_PARAMS >>$CONFIG
         fi
     else
         CONFIG="$config"
@@ -93,14 +93,14 @@ fi
 if [ -z "$app_id" ]; then
     echo "📲 No app ID specified. Defaulting to light client mode."
     APPID="0"
-else 
+else
     APPID="$app_id"
 fi
 if [ -z "$identity" ]; then
     IDENTITY=$HOME/.avail/identity/identity.toml
     if [ -f "$IDENTITY" ]; then
         echo "🔑 Identity found at $IDENTITY."
-    else 
+    else
         echo "🤷 No identity set. This will be automatically generated at startup."
     fi
 else
@@ -131,7 +131,7 @@ onexit() {
     echo "🔄 Avail stopped. Future instances of the light client can be started by invoking the avail-light binary or rerunning this script$EXTRAPROMPT"
     if [[ ":$PATH:" != *":$HOME/.avail/bin:"* ]]; then
         if ! grep -q "export PATH=\"\$PATH:$HOME/.avail/bin\"" "$PROFILE"; then
-            echo -e "export PATH=\"\$PATH:$HOME/.avail/bin\"\n" >> $PROFILE
+            echo -e "export PATH=\"\$PATH:$HOME/.avail/bin\"\n" >>$PROFILE
         fi
         echo -e "📌 Avail has been added to your profile. Run the following command to load it in the current session:\n. $PROFILE\n"
     fi
@@ -151,7 +151,7 @@ if [ "$UPGRADE" = 1 ]; then
         if [ -f $CONFIG ]; then
             rm $CONFIG
             touch $CONFIG
-            echo $CONFIG_PARAMS >> $CONFIG
+            echo $CONFIG_PARAMS >>$CONFIG
         fi
         if [ -d "$HOME/.avail/data" ]; then
             rm -rf $HOME/.avail/data
