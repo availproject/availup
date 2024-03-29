@@ -70,11 +70,11 @@ if [ "$NETWORK" = "goldberg" ]; then
     if [ -z "$config" ]; then
         CONFIG="$HOME/.avail/config/config.yml"
         if [ -f "$CONFIG" ]; then
-            echo "📄 Configuration file found at $CONFIG."
+            echo "🗑️ Wiping old config file at $CONFIG."
+            rm $CONFIG
         else
             echo "🤷 No configuration file set. This will be automatically generated at startup."
         fi
-        rm $CONFIG
         touch $CONFIG
         echo -e $CONFIG_PARAMS >> $CONFIG
     else
