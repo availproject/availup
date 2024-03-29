@@ -170,7 +170,7 @@ if [ "$(uname -m)" = "arm64" -a "$(uname -s)" = "Darwin" ]; then
 elif [ "$(uname -m)" = "x86_64" -a "$(uname -s)" = "Darwin" ]; then
     ARCH_STRING="apple-x86_64"
 elif [ "$(uname -m)" = "aarch64" -o "$(uname -m)" = "arm64" ]; then
-    ARCH_STRING="linux-aarch64"
+    ARCH_STRING="linux-arm64"
 elif [ "$(uname -m)" = "x86_64" ]; then
     ARCH_STRING="linux-amd64"
 fi
