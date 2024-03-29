@@ -8,6 +8,22 @@ while [ $# -gt 0 ]; do
     fi
     shift
 done
+# generate folders if missing
+if [ ! -d "$HOME/.avail" ]; then
+    mkdir $HOME/.avail
+fi
+if [ ! -d "$HOME/.avail/bin" ]; then
+    mkdir $HOME/.avail/bin
+fi
+if [ ! -d "$HOME/.avail/identity" ]; then
+    mkdir $HOME/.avail/identity
+fi
+if [ ! -d "$HOME/.avail/data" ]; then
+    mkdir $HOME/.avail/data
+fi
+if [ ! -d "$HOME/.avail/config" ]; then
+    mkdir $HOME/.avail/config
+fi
 # check if bash is current terminal shell, else check for zsh
 if [ -z "$BASH_VERSION" ]; then
     if [ -z "$ZSH_VERSION" ]; then
@@ -46,12 +62,30 @@ if [ -z "$network" ]; then
 else 
     NETWORK="$network"
 fi
+CONFIG_PARAMS="bootstraps=['/dns/bootnode.1.lightclient.goldberg.avail.tools/tcp/37000/p2p/12D3KooWBkLsNGaD3SpMaRWtAmWVuiZg1afdNSPbtJ8M8r9ArGRT','/dns/bootnode.2.lightclient.goldberg.avail.tools/tcp/37000/p2p/12D3KooWRCgfvaLSnQfkwGehrhSNpY7i5RenWKL2ARst6ZqgdZZd']\nfull_node_ws=['wss://rpc-goldberg.sandbox.avail.tools:443','wss://goldberg-rpc.fra.avail.tools:443']\nconfidence=99.0\navail_path='$HOME/.avail/data'\nrecord_ttl=43200\n"
+AVAIL_BIN=$HOME/.avail/bin/avail-light
 if [ "$NETWORK" = "goldberg" ]; then
     echo "📌 Goldberg testnet selected."
     VERSION="v1.7.9"
+    if [ -z "$config" ]; then
+    CONFIG="$HOME/.avail/config/config.yml"
+        if [ -f "$CONFIG" ]; then
+            echo "📄 Configuration file found at $CONFIG."
+        else 
+            echo "🤷 No configuration file set. This will be automatically generated at startup."
+            touch $CONFIG
+            echo -e $CONFIG_PARAMS >> $CONFIG
+        fi
+    else
+        CONFIG="$config"
+    fi
 elif [ "$NETWORK" = "local" ]; then
     echo "📌 Local testnet selected."
     VERSION="v1.7.9"
+    if [ -z "$config" ]; then
+        echo "🚫 No configuration file was provided for local testnet, exiting."
+        exit 1
+    fi
 else
     echo "🚫 Invalid network selected. Select one of the following: goldberg, local."
     exit 1
@@ -72,20 +106,11 @@ if [ -z "$identity" ]; then
 else
     IDENTITY="$identity"
 fi
-if [ ! -d "$HOME/.avail" ]; then
-    mkdir $HOME/.avail
-fi
-if [ ! -d "$HOME/.avail/bin" ]; then
-    mkdir $HOME/.avail/bin
-fi
-if [ ! -d "$HOME/.avail/identity" ]; then
-    mkdir $HOME/.avail/identity
-fi
 # check if avail-light version matches!
 UPGRADE=0
 if [ ! -z "$upgrade" ]; then
     echo "🔄 Checking for updates..."
-    if [ -f $HOME/.avail/bin/avail-light ]; then
+    if [ -f $AVAIL_BIN ]; then
         CURRENT_VERSION="v$($HOME/.avail/bin/avail-light --version | cut -d " " -f 2)"
         if [ "$CURRENT_VERSION" = "v1.7.8" ] && [ "$VERSION" = "v1.7.9" ]; then
             UPGRADE=0
@@ -113,20 +138,24 @@ onexit() {
     exit 0
 }
 # check if avail-light binary is available and check if upgrade variable is set to 0
-if [ -f $HOME/.avail/bin/avail-light -a "$UPGRADE" = 0 ]; then
+if [ -f $AVAIL_BIN -a "$UPGRADE" = 0 ]; then
     echo "✅ Avail is already installed. Starting Avail..."
     trap onexit EXIT
-    if [ -z "$config" ]; then
-        $HOME/.avail/bin/avail-light --network $NETWORK --app-id $APPID --identity $IDENTITY
-    else
-        $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
-    fi
+    $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
     exit 0
 fi
 if [ "$UPGRADE" = 1 ]; then
     echo "🔄 Upgrading Avail..."
-    if [ -f "$HOME/.avail/bin/avail-light" ]; then
-        rm $HOME/.avail/bin/avail-light
+    if [ -f $AVAIL_BIN ]; then
+        rm $AVAIL_BIN
+        if [ -f $CONFIG ]; then
+            rm $CONFIG
+            touch $CONFIG
+            echo $CONFIG_PARAMS >> $CONFIG
+        fi
+        if [ -d "$HOME/.avail/data" ]; then
+            rm -rf $HOME/.avail/data
+        fi
     else
         echo "🤔 Avail was not installed with availup. Attemping to uninstall with cargo..."
         cargo uninstall avail-light || echo "👀 Avail was not installed with cargo, upgrade might not be required!"
@@ -174,14 +203,10 @@ else
     # use tar to extract the downloaded file and move it to .avail/bin/ directory
     tar -xzf avail-light-$ARCH_STRING.tar.gz
     chmod +x avail-light-$ARCH_STRING
-    mv avail-light-$ARCH_STRING $HOME/.avail/bin/avail-light
+    mv avail-light-$ARCH_STRING $AVAIL_BIN
     rm avail-light-$ARCH_STRING.tar.gz
 fi
 echo "✅ Availup exited successfully."
 echo "🧱 Starting Avail."
 trap onexit EXIT
-if [ -z "$config" ]; then
-    $HOME/.avail/bin/avail-light --network $NETWORK --app-id $APPID --identity $IDENTITY
-else
-    $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
-fi
+$AVAIL_BIN --config $CONFIG --app-id $APPID --identity $IDENTITY
