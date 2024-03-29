@@ -41,35 +41,35 @@ else
     PROFILE="/etc/profile"
 fi
 if [ -z "$network" ]; then
-    echo "🛜  No network selected. Defaulting to goldberg."
+    echo "🛜  No network selected. Defaulting to goldberg testnet."
     NETWORK="goldberg"
 else 
     NETWORK="$network"
 fi
 if [ "$NETWORK" = "goldberg" ]; then
-    echo "📌 Goldberg network selected."
+    echo "📌 Goldberg testnet selected."
     VERSION="v1.7.9"
 elif [ "$NETWORK" = "local" ]; then
-    echo "📌 Local network selected."
+    echo "📌 Local testnet selected."
     VERSION="v1.7.9"
 else
-    echo "🚫 Invalid network selected. Please select one of the following: goldberg, kate, local."
+    echo "🚫 Invalid network selected. Select one of the following: goldberg, local."
     exit 1
 fi
 if [ -z "$app_id" ]; then
-    echo "📲 No app ID specified. Defaulting to 0."
+    echo "📲 No app ID specified. Defaulting to light client mode."
     APPID="0"
 else 
     APPID="$app_id"
 fi
 if [ -z "$identity" ]; then
     IDENTITY=$HOME/.avail/identity/identity.toml
-    if [ -f "$HOME/.avail/identity/identity.toml" ]; then
+    if [ -f "$IDENTITY" ]; then
         echo "🔑 Identity found at $IDENTITY."
     else 
         echo "🤷 No identity set. This will be automatically generated at startup."
     fi
-else 
+else
     IDENTITY="$identity"
 fi
 if [ ! -d "$HOME/.avail" ]; then
@@ -85,8 +85,8 @@ fi
 UPGRADE=0
 if [ ! -z "$upgrade" ]; then
     echo "🔄 Checking for updates..."
-    if command -v avail-light >/dev/null 2>&1; then
-        CURRENT_VERSION="v$(avail-light --version | cut -d " " -f 2)"
+    if [ -f $HOME/.avail/bin/avail-light ]; then
+        CURRENT_VERSION="v$($HOME/.avail/bin/avail-light --version | cut -d " " -f 2)"
         if [ "$CURRENT_VERSION" = "v1.7.8" ] && [ "$VERSION" = "v1.7.9" ]; then
             UPGRADE=0
             echo "✨ Avail binary is up to date. Skipping upgrade."
@@ -94,7 +94,7 @@ if [ ! -z "$upgrade" ]; then
             UPGRADE=1
             echo "✨ Avail binary is up to date. Skipping upgrade."
         else
-            if [ "$upgrade" = "y" ] || [ "$upgrade" = "yes" ]; then
+            if [ "$upgrade" = "y" -o "$upgrade" = "yes" ]; then
                 UPGRADE=1
             fi
         fi
@@ -102,27 +102,24 @@ if [ ! -z "$upgrade" ]; then
 fi
 
 onexit() {
+    chmod 600 $IDENTITY
     echo "🔄 Avail stopped. Future instances of the light client can be started by invoking the avail-light binary or rerunning this script$EXTRAPROMPT"
     if [[ ":$PATH:" != *":$HOME/.avail/bin:"* ]]; then
         if ! grep -q "export PATH=\"\$PATH:$HOME/.avail/bin\"" "$PROFILE"; then
             echo -e "export PATH=\"\$PATH:$HOME/.avail/bin\"\n" >> $PROFILE
         fi
-        echo -e "📌 Avail has been added to your profile. Run the following command to load it in the current terminal session:\n. $PROFILE\n"
+        echo -e "📌 Avail has been added to your profile. Run the following command to load it in the current session:\n. $PROFILE\n"
     fi
     exit 0
 }
 # check if avail-light binary is available and check if upgrade variable is set to 0
-if command -v avail-light >/dev/null 2>&1 && [ "$UPGRADE" = 0 ]; then
+if [ -f $HOME/.avail/bin/avail-light -a "$UPGRADE" = 0 ]; then
     echo "✅ Avail is already installed. Starting Avail..."
     trap onexit EXIT
-    if [ -z "$config" ] && [ ! -z "$identity" ]; then
+    if [ -z "$config" ]; then
         $HOME/.avail/bin/avail-light --network $NETWORK --app-id $APPID --identity $IDENTITY
-    elif [ -z "$config" ]; then
-        $HOME/.avail/bin/avail-light --network $NETWORK --app-id $APPID
-    elif [ ! -z "$config" ] && [ ! -z "$identity" ]; then
-        $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
     else
-        $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID
+        $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
     fi
     exit 0
 fi
@@ -174,7 +171,7 @@ else
         echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
         exit 1
     fi
-    # use tar to extract the downloaded file and move it to /usr/local/bin
+    # use tar to extract the downloaded file and move it to .avail/bin/ directory
     tar -xzf avail-light-$ARCH_STRING.tar.gz
     chmod +x avail-light-$ARCH_STRING
     mv avail-light-$ARCH_STRING $HOME/.avail/bin/avail-light
@@ -183,12 +180,8 @@ fi
 echo "✅ Availup exited successfully."
 echo "🧱 Starting Avail."
 trap onexit EXIT
-if [ -z "$config" ] && [ ! -z "$identity" ]; then
+if [ -z "$config" ]; then
     $HOME/.avail/bin/avail-light --network $NETWORK --app-id $APPID --identity $IDENTITY
-elif [ -z "$config" ]; then
-    $HOME/.avail/bin/avail-light --network $NETWORK --app-id $APPID
-elif [ ! -z "$config" ] && [ ! -z "$identity" ]; then
-    $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
 else
-    $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID
+    $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
 fi
