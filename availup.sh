@@ -186,12 +186,22 @@ if [ -z "$ARCH_STRING" ]; then
         echo "📦 Cargo is now available. Reattempting to build from source..."
     fi
     # check if avail-light folder exists in home directory, if yes, pull latest changes, else clone the repo
-    echo "📂 Cloning avail-light repository and building..."
-    git clone -q -c advice.detachedHead=false --depth=1 --single-branch --branch $VERSION https://github.com/availproject/avail-light.git $HOME/avail-light
-    cd $HOME/avail-light
-    cargo build --release
-    mv $HOME/avail-light/target/release/avail-light $AVAIL_BIN
-    rm -rf $HOME/avail-light
+    AVAIL_LIGHT_DIR=$HOME/avail-light
+    if [ -d $AVAIL_LIGHT_DIR ]; then
+        echo "🔄 Updating avail-light repository and building..."
+        cd $AVAIL_LIGHT_DIR
+        git pull -q origin $VERSION
+        git checkout -q $VERSION
+        cargo build --release
+        cp $AVAIL_LIGHT_DIR/target/release/avail-light $AVAIL_BIN
+    else
+        echo "📂 Cloning avail-light repository and building..."
+        git clone -q -c advice.detachedHead=false --depth=1 --single-branch --branch $VERSION https://github.com/availproject/avail-light.git $AVAIL_LIGHT_DIR
+        cd $AVAIL_LIGHT_DIR
+        cargo build --release
+        mv $AVAIL_LIGHT_DIR/target/release/avail-light $AVAIL_BIN
+        rm -rf $AVAIL_LIGHT_DIR
+    fi
 else
     if command -v curl >/dev/null 2>&1; then
         curl -sLO https://github.com/availproject/avail-light/releases/download/$VERSION/avail-light-$ARCH_STRING.tar.gz
