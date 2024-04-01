@@ -70,7 +70,7 @@ if [ "$NETWORK" = "goldberg" ]; then
     if [ -z "$config" ]; then
         CONFIG="$HOME/.avail/config/config.yml"
         if [ -f "$CONFIG" ]; then
-            echo "🗑️ Wiping old config file at $CONFIG."
+            echo "🗑️  Wiping old config file at $CONFIG."
             rm $CONFIG
         else
             echo "🤷 No configuration file set. This will be automatically generated at startup."
@@ -113,13 +113,11 @@ if [ ! -z "$upgrade" ]; then
     echo "🔄 Checking for updates..."
     if [ -f $AVAIL_BIN ]; then
         CURRENT_VERSION="v$($HOME/.avail/bin/avail-light --version | cut -d " " -f 2)"
-        if [ "$CURRENT_VERSION" = "v1.7.8" ] && [ "$VERSION" = "v1.7.9" ]; then
-            UPGRADE=0
-            echo "✨ Avail binary is up to date. Skipping upgrade."
-        elif [ "$CURRENT_VERSION" != "$VERSION" ]; then
+        if [ "$CURRENT_VERSION" != "$VERSION" ]; then
             UPGRADE=1
-            echo "✨ Avail binary is up to date. Skipping upgrade."
+            echo "⬆️ Avail binary is out of date. Upgrading..."
         else
+            echo "✅ Avail binary is up to date."
             if [ "$upgrade" = "y" -o "$upgrade" = "yes" ]; then
                 UPGRADE=1
             fi
@@ -142,20 +140,21 @@ onexit() {
 if [ -f $AVAIL_BIN -a "$UPGRADE" = 0 ]; then
     echo "✅ Avail is already installed. Starting Avail..."
     trap onexit EXIT
-    $HOME/.avail/bin/avail-light --config $CONFIG --app-id $APPID --identity $IDENTITY
+    $AVAIL_BIN --config $CONFIG --app-id $APPID --identity $IDENTITY
     exit 0
 fi
 if [ "$UPGRADE" = 1 ]; then
-    echo "🔄 Upgrading Avail..."
+    echo "🔄 Resetting configuration and data..."
     if [ -f $AVAIL_BIN ]; then
         rm $AVAIL_BIN
         if [ -f $CONFIG ]; then
             rm $CONFIG
             touch $CONFIG
-            echo $CONFIG_PARAMS >>$CONFIG
+            echo -e $CONFIG_PARAMS >>$CONFIG
         fi
         if [ -d "$HOME/.avail/data" ]; then
             rm -rf $HOME/.avail/data
+            mkdir $HOME/.avail/data
         fi
     else
         echo "🤔 Avail was not installed with availup. Attemping to uninstall with cargo..."
@@ -190,7 +189,8 @@ if [ -z "$ARCH_STRING" ]; then
     echo "📂 Cloning avail-light repository and building..."
     git clone -q -c advice.detachedHead=false --depth=1 --single-branch --branch $VERSION https://github.com/availproject/avail-light.git $HOME/avail-light
     cd $HOME/avail-light
-    cargo install --locked --path . --bin avail-light
+    cargo build --release
+    mv $HOME/avail-light/target/release/avail-light $AVAIL_BIN
     rm -rf $HOME/avail-light
 else
     if command -v curl >/dev/null 2>&1; then
