@@ -66,7 +66,7 @@ CONFIG_PARAMS="bootstraps=['/dns/bootnode.1.lightclient.goldberg.avail.tools/tcp
 AVAIL_BIN=$HOME/.avail/bin/avail-light
 if [ "$NETWORK" = "goldberg" ]; then
     echo "📌 Goldberg testnet selected."
-    VERSION="v1.7.9"
+    VERSION="v1.7.10"
     if [ -z "$config" ]; then
         CONFIG="$HOME/.avail/config/config.yml"
         if [ -f "$CONFIG" ]; then
@@ -82,7 +82,7 @@ if [ "$NETWORK" = "goldberg" ]; then
     fi
 elif [ "$NETWORK" = "local" ]; then
     echo "📌 Local testnet selected."
-    VERSION="v1.7.9"
+    VERSION="v1.7.10"
     if [ -z "$config" ]; then
         echo "🚫 No configuration file was provided for local testnet, exiting."
         exit 1
@@ -115,7 +115,7 @@ if [ ! -z "$upgrade" ]; then
         CURRENT_VERSION="v$($HOME/.avail/bin/avail-light --version | cut -d " " -f 2)"
         if [ "$CURRENT_VERSION" != "$VERSION" ]; then
             UPGRADE=1
-            echo "⬆️ Avail binary is out of date. Upgrading..."
+            echo "⬆️  Avail binary is out of date. Upgrading..."
         else
             echo "✅ Avail binary is up to date."
             if [ "$upgrade" = "y" -o "$upgrade" = "yes" ]; then
