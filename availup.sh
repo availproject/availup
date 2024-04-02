@@ -113,7 +113,10 @@ if [ ! -z "$upgrade" ]; then
     echo "🔄 Checking for updates..."
     if [ -f $AVAIL_BIN ]; then
         CURRENT_VERSION="v$($HOME/.avail/bin/avail-light --version | cut -d " " -f 2)"
-        if [ "$CURRENT_VERSION" != "$VERSION" ]; then
+        if [ "$CURRENT_VERSION" = "v1.7.9" ]; then
+            UPGRADE=1
+            echo "⬆️  Avail binary is out of date. Upgrading..."
+        elif [ "$CURRENT_VERSION" != "$VERSION" ]; then
             UPGRADE=1
             echo "⬆️  Avail binary is out of date. Upgrading..."
         else
@@ -121,6 +124,14 @@ if [ ! -z "$upgrade" ]; then
             if [ "$upgrade" = "y" -o "$upgrade" = "yes" ]; then
                 UPGRADE=1
             fi
+        fi
+    fi
+else 
+    if [ -f $AVAIL_BIN ]; then
+        CURRENT_VERSION="v$($HOME/.avail/bin/avail-light --version | cut -d " " -f 2)"
+        if [ "$CURRENT_VERSION" = "v1.7.9" ]; then
+            UPGRADE=1
+            echo "⬆️  Avail binary is out of date. Upgrading..."
         fi
     fi
 fi
