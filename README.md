@@ -53,6 +53,9 @@ nano ~/identity.toml
 curl -sL1 avail.sh | bash -s -- --identity ~/identity.toml
 ```
 
+> ℹ️ The script persists your identity file between runs. Deleting the file will cause a new one to be generated on
+> the next run.
+
 Alternatively, you can pass a specific application ID with `availup`:
 ```bash
 rm ~/.avail/goldberg/config.yml
