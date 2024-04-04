@@ -8,20 +8,6 @@ while [ $# -gt 0 ]; do
     fi
     shift
 done
-# handle WSL systems
-if uname -r | grep -qEi "(Microsoft|WSL)"; then
-    # force remove IO lock
-    if [ -d "$HOME/.avail/data" ]; then
-        rm -rf $HOME/.avail/data
-        mkdir $HOME/.avail/data
-    fi
-    if [ $"force_wsl" != 'y']; then
-        echo "👀 WSL detected. This script is not fully compatible with WSL. Please download the Windows runner instead by clicking this link: https://github.com/availproject/avail-light/releases/download/v1.7.10/avail-light-windows-runner.zip Alternatively, rerun the command with --force_wsl y"
-        exit 1
-    else
-        echo "👀 WSL detected. The binary is not fully compatible with WSL but forcing the run anyway."
-    fi
-fi
 # generate folders if missing
 if [ ! -d "$HOME/.avail" ]; then
     mkdir $HOME/.avail
@@ -120,6 +106,20 @@ if [ -z "$identity" ]; then
     fi
 else
     IDENTITY="$identity"
+fi
+# handle WSL systems
+if uname -r | grep -qEi "(Microsoft|WSL)"; then
+    # force remove IO lock
+    if [ -d "$HOME/.avail/data" ]; then
+        rm -rf $HOME/.avail/data
+        mkdir $HOME/.avail/data
+    fi
+    if [ "$force_wsl" != 'y' ]; then
+        echo "👀 WSL detected. This script is not fully compatible with WSL. Please download the Windows runner instead by clicking this link: https://github.com/availproject/avail-light/releases/download/v1.7.10/avail-light-windows-runner.zip Alternatively, rerun the command with --force_wsl y"
+        exit 1
+    else
+        echo "👀 WSL detected. The binary is not fully compatible with WSL but forcing the run anyway."
+    fi
 fi
 # check if avail-light version matches!
 UPGRADE=0
