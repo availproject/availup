@@ -114,7 +114,7 @@ if uname -r | grep -qEi "(Microsoft|WSL)"; then
         rm -rf $HOME/.avail/data
         mkdir $HOME/.avail/data
     fi
-    if [ "$force_wsl" != 'y' ]; then
+    if [ "$force_wsl" != 'y' -a "$force_wsl" != 'yes' ]; then
         echo "👀 WSL detected. This script is not fully compatible with WSL. Please download the Windows runner instead by clicking this link: https://github.com/availproject/avail-light/releases/download/v1.7.10/avail-light-windows-runner.zip Alternatively, rerun the command with --force_wsl y"
         exit 1
     else
