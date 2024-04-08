@@ -62,7 +62,7 @@ if [ -z "$network" ]; then
 else
     NETWORK="$network"
 fi
-CONFIG_PARAMS="bootstraps=['/dns/bootnode.1.lightclient.goldberg.avail.tools/tcp/37000/p2p/12D3KooWBkLsNGaD3SpMaRWtAmWVuiZg1afdNSPbtJ8M8r9ArGRT','/dns/bootnode.2.lightclient.goldberg.avail.tools/tcp/37000/p2p/12D3KooWRCgfvaLSnQfkwGehrhSNpY7i5RenWKL2ARst6ZqgdZZd']\nfull_node_ws=['wss://rpc-goldberg.sandbox.avail.tools:443','wss://avail-goldberg.public.blastapi.io:443','wss://lc-rpc-goldberg.avail.tools:443/ws','wss://avail-goldberg-rpc.lgns.xyz:443/ws','wss://avail-goldberg-rpc.polka.p2p.world:443']\nconfidence=80.0\navail_path='$HOME/.avail/data'\nkad_record_ttl=43200\not_collector_endpoint='http://otelcol.lightclient.goldberg.avail.tools:4317'\ngenesis_hash='6f09966420b2608d1947ccfb0f2a362450d1fc7fd902c29b67c906eaa965a7ae'\nblock_processing_delay=100\n"
+CONFIG_PARAMS="bootstraps=['/dns/bootnode.2.lightclient.goldberg.avail.tools/tcp/37000/p2p/12D3KooWRCgfvaLSnQfkwGehrhSNpY7i5RenWKL2ARst6ZqgdZZd','/dns/bootnode.1.lightclient.goldberg.avail.tools/tcp/37000/p2p/12D3KooWBkLsNGaD3SpMaRWtAmWVuiZg1afdNSPbtJ8M8r9ArGRT']\nfull_node_ws=['wss://rpc-goldberg.sandbox.avail.tools:443','wss://avail-goldberg.public.blastapi.io:443','wss://lc-rpc-goldberg.avail.tools:443/ws','wss://avail-goldberg-rpc.lgns.xyz:443/ws','wss://avail-goldberg-rpc.polka.p2p.world:443']\nconfidence=80.0\navail_path='$HOME/.avail/data'\nkad_record_ttl=43200\not_collector_endpoint='http://otelcol.lightclient.goldberg.avail.tools:4317'\ngenesis_hash='6f09966420b2608d1947ccfb0f2a362450d1fc7fd902c29b67c906eaa965a7ae'\nblock_processing_delay=100\noperation_mode='server'\nlog_level='debug'"
 AVAIL_BIN=$HOME/.avail/bin/avail-light
 if [ "$NETWORK" = "goldberg" ]; then
     echo "📌 Goldberg testnet selected."
