@@ -1,0 +1,17 @@
+name: Run avail.sh Script
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Run avail.sh Script
+        run: |
+          curl -sL1 avail.sh | bash
