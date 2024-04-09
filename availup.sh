@@ -93,7 +93,6 @@ else
 fi
 if [ -z "$app_id" ]; then
     echo "📲 No app ID specified. Defaulting to light client mode."
-    APPID="0"
 else
     APPID="$app_id"
 fi
@@ -161,12 +160,21 @@ onexit() {
     fi
     exit 0
 }
+
+run_binary() {
+    trap onexit EXIT
+    if [ -z "$APPID" ]; then
+        $AVAIL_BIN --config $CONFIG --identity $IDENTITY
+    else 
+        $AVAIL_BIN --config $CONFIG --app-id $APPID --identity $IDENTITY
+    fi
+    exit 0
+}
 # check if avail-light binary is available and check if upgrade variable is set to 0
 if [ -f $AVAIL_BIN -a "$UPGRADE" = 0 ]; then
     echo "✅ Avail is already installed. Starting Avail..."
     trap onexit EXIT
-    $AVAIL_BIN --config $CONFIG --app-id $APPID --identity $IDENTITY
-    exit 0
+    run_binary
 fi
 if [ "$UPGRADE" = 1 ]; then
     echo "🔄 Resetting configuration and data..."
@@ -244,5 +252,4 @@ else
 fi
 echo "✅ Availup exited successfully."
 echo "🧱 Starting Avail."
-trap onexit EXIT
-$AVAIL_BIN --config $CONFIG --app-id $APPID --identity $IDENTITY
+run_binary
