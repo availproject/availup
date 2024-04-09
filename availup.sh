@@ -165,7 +165,7 @@ run_binary() {
     trap onexit EXIT
     if [ -z "$APPID" ]; then
         $AVAIL_BIN --config $CONFIG --identity $IDENTITY
-    else 
+    else
         $AVAIL_BIN --config $CONFIG --app-id $APPID --identity $IDENTITY
     fi
     exit 0
