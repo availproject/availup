@@ -86,7 +86,7 @@ if [ "$NETWORK" = "turing" ]; then
     fi
 elif [ "$NETWORK" = "goldberg" ]; then
     echo "📌 Goldberg testnet selected."
-    VERSION="v1.7.10"
+    VERSION="v1.7.11"
     if [ -z "$config" ]; then
         CONFIG="$HOME/.avail/$NETWORK/config/config.yml"
         if [ -f "$CONFIG" ]; then
