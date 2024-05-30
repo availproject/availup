@@ -102,7 +102,7 @@ elif [ "$NETWORK" = "goldberg" ]; then
     fi
 elif [ "$NETWORK" = "local" ]; then
     echo "📌 Local testnet selected."
-    VERSION="v1.7.10"
+    VERSION="v1.7.11"
     if [ -z "$config" ]; then
         echo "🚫 No configuration file was provided for local testnet, exiting."
         exit 1
@@ -142,7 +142,7 @@ if uname -r | grep -qEi "(Microsoft|WSL)"; then
 fi
 # check if avail-light version matches!
 UPGRADE=0
-if [ ! -z "$upgrade" ]; then
+if [ ! -z "$upgrade" ] || [ "$NETWORK" = "goldberg" ]; then
     echo "🔄 Checking for updates..."
     if [ -f $AVAIL_BIN ]; then
         CURRENT_VERSION="v$($HOME/.avail/$NETWORK/bin/avail-light --version | cut -d " " -f 2)"
@@ -159,7 +159,7 @@ if [ ! -z "$upgrade" ]; then
 else
     if [ -f $AVAIL_BIN ]; then
         CURRENT_VERSION="v$($HOME/.avail/$NETWORK/bin/avail-light --version | cut -d " " -f 2)"
-        if [ "$CURRENT_VERSION" = "v1.7.9" ]; then
+        if [ "$CURRENT_VERSION" = "v1.7.11" ]; then
             UPGRADE=1
             echo "⬆️  Avail binary is out of date. Upgrading..."
         fi
