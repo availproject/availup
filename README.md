@@ -9,11 +9,11 @@ wget --https-only --secure-protocol=TLSv1_2 --quiet -O - avail.sh | bash
 ```
 You can pass additional flags to the script like:
 ```bash
-curl -sL1 avail.sh | bash -s -- --network goldberg
+curl -sL1 avail.sh | bash -s -- --network turing
 ```
 
 Currently available flags are:
-* `network`: can be one of the following: [`goldberg`, `local`]
+* `network`: can be one of the following: [`turing`, `local`]
 * `config`: path to the configuration file, availup will generate a config if this flag is not specified
   * This flag is always required when running a local testnet
 * `identity`: path to the identity file, availup will generate a config if this flag is not specified
@@ -58,7 +58,7 @@ curl -sL1 avail.sh | bash -s -- --identity ~/identity.toml
 
 Alternatively, you can pass a specific application ID with `availup`:
 ```bash
-rm ~/.avail/goldberg/config.yml
+rm ~/.avail/turing/config.yml
 # and rerunning the script with flags:
 curl -sL1 avail.sh | bash -s -- --app_id 1
 ```
