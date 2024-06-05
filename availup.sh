@@ -160,7 +160,7 @@ if [ ! -z "$upgrade" ] || [ "$UPGRADE" = 1 ]; then
 else
     if [ -f $AVAIL_BIN ]; then
         CURRENT_VERSION="v$($HOME/.avail/$NETWORK/bin/avail-light --version | cut -d " " -f 2)"
-        if [ "$CURRENT_VERSION" = "$LOCAL_VERSION" ]; then
+        if [ "$CURRENT_VERSION" = "$VERSION" ]; then
             UPGRADE=1
             echo "⬆️  Avail binary is out of date. Upgrading..."
         fi
