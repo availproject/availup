@@ -48,24 +48,23 @@ else
     PROFILE="/etc/profile"
 fi
 if [ -z "$network" ]; then
-    echo "🛜  No network selected. Defaulting to turing testnet."
-    NETWORK="turing"
+    echo "🛜  No network selected. Defaulting to mainnet."
+    NETWORK="mainnet"
 else
     NETWORK="$network"
 fi
 
 UPGRADE=0
-if [ "$NETWORK" = "turing" ]; then
+if [ "$NETWORK" = "mainnet" ]; then
+    echo "📌 Mainnet selected."
+elif [ "$NETWORK" = "turing" ]; then
     echo "📌 Turing testnet selected."
-elif [ "$NETWORK" = "goldberg" ]; then
-    echo "📌 Goldberg network is deprecated. Turing testnet selected."
-    NETWORK="turing"
-    UPGRADE=1
 elif [ "$NETWORK" = "local" ]; then
     echo "📌 Local testnet selected."
 fi
 
 TURING_CONFIG_PARAMS="bootstraps=['/dns/bootnode.1.lightclient.turing.avail.so/tcp/37000/p2p/12D3KooWBkLsNGaD3SpMaRWtAmWVuiZg1afdNSPbtJ8M8r9ArGRT']\nfull_node_ws=['wss://avail-turing.public.blastapi.io','wss://turing-testnet.avail-rpc.com']\nconfidence=80.0\navail_path='$HOME/.avail/$NETWORK/data'\nkad_record_ttl=43200\not_collector_endpoint='http://otel.lightclient.turing.avail.so:4317'\ngenesis_hash='d3d2f3a3495dc597434a99d7d449ebad6616db45e4e4f178f31cc6fa14378b70'\n"
+MAINNET_CONFIG_PARAMS="bootstraps=['/dns/bootnode.1.lightclient.mainnet.avail.so/tcp/37000/p2p/12D3KooW9x9qnoXhkHAjdNFu92kMvBRSiFBMAoC5NnifgzXjsuiM']\nfull_node_ws=['wss://mainnet-rpc.avail.so/ws','wss://mainnet.avail-rpc.com','wss://avail-mainnet.public.blastapi.io']\nconfidence=80.0\navail_path='$HOME/.avail/$NETWORK/data'\nkad_record_ttl=43200\ngenesis_hash='b91746b45e0346cc2f815a520b9c6cb4d5c0902af848db0a80f85932d2e8276a'\not_collector_endpoint='http://otel.lightclient.mainnet.avail.so:4317'\n"
 AVAIL_BIN=$HOME/.avail/$NETWORK/bin/avail-light
 if [ ! -d "$HOME/.avail/$NETWORK" ]; then
     mkdir $HOME/.avail/$NETWORK
@@ -80,12 +79,26 @@ if [ ! -d "$HOME/.avail/$NETWORK/config" ]; then
     mkdir $HOME/.avail/$NETWORK/config
 fi
 
+readonly MAINNET_VERSION="avail-light-client-v1.11.1"
 readonly TURING_VERSION="v1.9.0"
 readonly LOCAL_VERSION="v1.9.0"
 
-
-
-if [ "$NETWORK" = "turing" ]; then
+if [ "$NETWORK" = "mainnet" ]; then
+    VERSION=$MAINNET_VERSION
+    if [ -z "$config" ]; then
+        CONFIG="$HOME/.avail/$NETWORK/config/config.yml"
+        if [ -f "$CONFIG" ]; then
+            echo "🗑️  Wiping old config file at $CONFIG."
+            rm $CONFIG
+        else
+            echo "🤷 No configuration file set. This will be automatically generated at startup."
+        fi
+        touch $CONFIG
+        echo -e $MAINNET_CONFIG_PARAMS >>$CONFIG
+    else
+        CONFIG="$config"
+    fi
+elif [ "$NETWORK" = "turing" ]; then
     VERSION=$TURING_VERSION
     if [ -z "$config" ]; then
         CONFIG="$HOME/.avail/$NETWORK/config/config.yml"

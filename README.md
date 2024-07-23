@@ -13,7 +13,7 @@ curl -sL1 avail.sh | bash -s -- --network turing
 ```
 
 Currently available flags are:
-* `network`: can be one of the following: [`turing`, `local`]
+* `network`: can be one of the following: [`mainnet`, `turing`, `local`]
 * `config`: path to the configuration file, availup will generate a config if this flag is not specified
   * This flag is always required when running a local testnet
 * `identity`: path to the identity file, availup will generate a config if this flag is not specified
