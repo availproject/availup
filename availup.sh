@@ -205,7 +205,7 @@ if [ -f $AVAIL_BIN -a "$UPGRADE" = 0 ]; then
     run_binary
 fi
 if [ "$UPGRADE" = 1 ]; then
-    echo "🔄 Resetting configuration and data..."
+    echo "🔄 Resetting configuration..."
     if [ -f $AVAIL_BIN ]; then
         rm $AVAIL_BIN
         if [ -f $CONFIG ]; then
