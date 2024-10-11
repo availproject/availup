@@ -79,12 +79,13 @@ if [ ! -d "$HOME/.avail/$NETWORK/config" ]; then
     mkdir $HOME/.avail/$NETWORK/config
 fi
 
-readonly MAINNET_VERSION="avail-light-client-v1.12.0-rc2"
-readonly TURING_VERSION="avail-light-client-v1.12.0-rc2"
-readonly LOCAL_VERSION="avail-light-client-v1.12.0-rc2"
+LATEST_VERSION=$(curl -s "https://api.github.com/repos/availproject/avail-light/releases/latest" | grep '"tag_name"' | cut -d '"' -f 4)
+
+readonly MAINNET_VERSION="$LATEST_VERSION"
+readonly TURING_VERSION="$LATEST_VERSION"
+readonly LOCAL_VERSION="$LATEST_VERSION"
 
 if [ "$NETWORK" = "mainnet" ]; then
-    VERSION=$MAINNET_VERSION
     if [ -z "$config" ]; then
         CONFIG="$HOME/.avail/$NETWORK/config/config.yml"
         if [ -f "$CONFIG" ]; then
@@ -99,7 +100,6 @@ if [ "$NETWORK" = "mainnet" ]; then
         CONFIG="$config"
     fi
 elif [ "$NETWORK" = "turing" ]; then
-    VERSION=$TURING_VERSION
     if [ -z "$config" ]; then
         CONFIG="$HOME/.avail/$NETWORK/config/config.yml"
         if [ -f "$CONFIG" ]; then
@@ -115,7 +115,6 @@ elif [ "$NETWORK" = "turing" ]; then
     fi
 elif [ "$NETWORK" = "local" ]; then
     echo "📌 Local testnet selected."
-    VERSION=$LOCAL_VERSION
     if [ -z "$config" ]; then
         echo "🚫 No configuration file was provided for local testnet, exiting."
         exit 1
@@ -147,7 +146,7 @@ if uname -r | grep -qEi "(Microsoft|WSL)"; then
         mkdir $HOME/.avail/$NETWORK/data
     fi
     if [ "$force_wsl" != 'y' -a "$force_wsl" != 'yes' ]; then
-        echo "👀 WSL detected. This script is not fully compatible with WSL. Please download the Windows runner instead by clicking this link: https://github.com/availproject/avail-light/releases/download/$VERSION/avail-light-windows-runner.zip Alternatively, rerun the command with --force_wsl y"
+        echo "👀 WSL detected. This script is not fully compatible with WSL. Please download the Windows runner instead by clicking this link: https://github.com/availproject/avail-light/releases/download/$LATEST_VERSION/avail-light-windows-runner.zip Alternatively, rerun the command with --force_wsl y"
         exit 1
     else
         echo "👀 WSL detected. The binary is not fully compatible with WSL but forcing the run anyway."
@@ -155,29 +154,22 @@ if uname -r | grep -qEi "(Microsoft|WSL)"; then
 fi
 
 # check if avail-light version matches!
-if [ ! -z "$upgrade" ] || [ "$UPGRADE" = 1 ]; then
-    echo "🔄 Checking for updates..."
-    if [ -f $AVAIL_BIN ]; then
-        CURRENT_VERSION="v$($HOME/.avail/$NETWORK/bin/avail-light --version | cut -d " " -f 2)"
+echo "🔄 Checking for updates..."
+if [ -f "$AVAIL_BIN" ]; then
+    CURRENT_VERSION="$($HOME/.avail/$NETWORK/bin/avail-light --version | awk '{print $1"-v"$2}')"
 
-        if [ "$CURRENT_VERSION" != "$VERSION" ]; then
+    if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
+        echo "⬆️  Avail binary is out of date. Upgrading from $CURRENT_VERSION to $LATEST_VERSION..."
+        UPGRADE=1
+    else
+        echo "✅ Avail binary is up to date."
+        if [ "$upgrade" = "y" -o "$upgrade" = "yes" ]; then
             UPGRADE=1
-            echo "⬆️  Avail binary is out of date. Upgrading..."
-        else
-            echo "✅ Avail binary is up to date."
-            if [ "$upgrade" = "y" -o "$upgrade" = "yes" ]; then
-                UPGRADE=1
-            fi
         fi
     fi
 else
-    if [ -f $AVAIL_BIN ]; then
-        CURRENT_VERSION="v$($HOME/.avail/$NETWORK/bin/avail-light --version | cut -d " " -f 2)"
-        if [ "$CURRENT_VERSION" = "$VERSION" ]; then
-            UPGRADE=1
-            echo "⬆️  Avail binary is out of date. Upgrading..."
-        fi
-    fi
+    echo "⚠️ Avail binary not found, installing the latest version..."
+    UPGRADE=1
 fi
 
 onexit() {
@@ -221,11 +213,13 @@ if [ "$UPGRADE" = 1 ]; then
             touch $CONFIG
             if [ "$NETWORK" = "turing" ]; then
                 echo -e $TURING_CONFIG_PARAMS >>$CONFIG
+            elif [ "$NETWORK" = "mainnet" ]; then
+                echo -e $MAINNET_CONFIG_PARAMS >>$CONFIG
+            elif [ "$NETWORK" = "local" ]; then
+                echo -e $LOCAL_CONFIG_PARAMS >>$CONFIG
+            else
+                echo "Unknown network: $NETWORK"
             fi
-        fi
-        if [ -d "$HOME/.avail/$NETWORK/data" ]; then
-            rm -rf $HOME/.avail/$NETWORK/data
-            mkdir $HOME/.avail/$NETWORK/data
         fi
     else
         echo "🤔 Avail was not installed with availup. Attemping to uninstall with cargo..."
@@ -261,13 +255,13 @@ if [ -z "$ARCH_STRING" ]; then
     if [ -d $AVAIL_LIGHT_DIR ]; then
         echo "🔄 Updating avail-light repository and building..."
         cd $AVAIL_LIGHT_DIR
-        git pull -q origin $VERSION
-        git checkout -q $VERSION
+        git pull -q origin $LATEST_VERSION
+        git checkout -q $LATEST_VERSION
         cargo build --release
         cp $AVAIL_LIGHT_DIR/target/release/avail-light $AVAIL_BIN
     else
         echo "📂 Cloning avail-light repository and building..."
-        git clone -q -c advice.detachedHead=false --depth=1 --single-branch --branch $VERSION https://github.com/availproject/avail-light.git $AVAIL_LIGHT_DIR
+        git clone -q -c advice.detachedHead=false --depth=1 --single-branch --branch $LATEST_VERSION https://github.com/availproject/avail-light.git $AVAIL_LIGHT_DIR
         cd $AVAIL_LIGHT_DIR
         cargo build --release
         mv $AVAIL_LIGHT_DIR/target/release/avail-light $AVAIL_BIN
@@ -275,9 +269,9 @@ if [ -z "$ARCH_STRING" ]; then
     fi
 else
     if command -v curl >/dev/null 2>&1; then
-        curl -sLO https://github.com/availproject/avail-light/releases/download/$VERSION/avail-light-$ARCH_STRING.tar.gz
+        curl -sLO https://github.com/availproject/avail-light/releases/download/$LATEST_VERSION/avail-light-$ARCH_STRING.tar.gz
     elif command -v wget >/dev/null 2>&1; then
-        wget -qO- https://github.com/availproject/avail-light/releases/download/$VERSION/avail-light-$ARCH_STRING.tar.gz
+        wget -qO- https://github.com/availproject/avail-light/releases/download/$LATEST_VERSION/avail-light-$ARCH_STRING.tar.gz
     else
         echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
         exit 1
