@@ -79,13 +79,12 @@ if [ ! -d "$HOME/.avail/$NETWORK/config" ]; then
     mkdir $HOME/.avail/$NETWORK/config
 fi
 
-LATEST_VERSION=$(curl -s "https://api.github.com/repos/availproject/avail-light/releases/latest" | grep '"tag_name"' | cut -d '"' -f 4)
-
-readonly MAINNET_VERSION="$LATEST_VERSION"
-readonly TURING_VERSION="$LATEST_VERSION"
-readonly LOCAL_VERSION="$LATEST_VERSION"
+readonly MAINNET_VERSION="avail-light-client-v1.12.0"
+readonly LOCAL_VERSION="avail-light-client-v1.12.0"
+readonly TURING_VERSION="avail-light-client-v1.12.0"
 
 if [ "$NETWORK" = "mainnet" ]; then
+    VERSION=$MAINNET_VERSION
     if [ -z "$config" ]; then
         CONFIG="$HOME/.avail/$NETWORK/config/config.yml"
         if [ -f "$CONFIG" ]; then
@@ -100,6 +99,7 @@ if [ "$NETWORK" = "mainnet" ]; then
         CONFIG="$config"
     fi
 elif [ "$NETWORK" = "turing" ]; then
+    VERSION=$TURING_VERSION
     if [ -z "$config" ]; then
         CONFIG="$HOME/.avail/$NETWORK/config/config.yml"
         if [ -f "$CONFIG" ]; then
@@ -115,6 +115,7 @@ elif [ "$NETWORK" = "turing" ]; then
     fi
 elif [ "$NETWORK" = "local" ]; then
     echo "📌 Local testnet selected."
+    VERSION=$LOCAL_VERSION
     if [ -z "$config" ]; then
         echo "🚫 No configuration file was provided for local testnet, exiting."
         exit 1
@@ -154,22 +155,29 @@ if uname -r | grep -qEi "(Microsoft|WSL)"; then
 fi
 
 # check if avail-light version matches!
-echo "🔄 Checking for updates..."
-if [ -f "$AVAIL_BIN" ]; then
-    CURRENT_VERSION="$($HOME/.avail/$NETWORK/bin/avail-light --version | awk '{print $1"-v"$2}')"
+if [ ! -z "$upgrade" ] || [ "$UPGRADE" = 1 ]; then
+    echo "🔄 Checking for updates..."
+    if [ -f $AVAIL_BIN ]; then
+        CURRENT_VERSION="$($HOME/.avail/$NETWORK/bin/avail-light --version | awk '{print $1"-v"$2}')"
 
-    if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
-        echo "⬆️  Avail binary is out of date. Upgrading from $CURRENT_VERSION to $LATEST_VERSION..."
-        UPGRADE=1
-    else
-        echo "✅ Avail binary is up to date."
-        if [ "$upgrade" = "y" -o "$upgrade" = "yes" ]; then
+        if [ "$CURRENT_VERSION" != "$VERSION" ]; then
             UPGRADE=1
+            echo "⬆️  Avail binary is out of date. Upgrading..."
+        else
+            echo "✅ Avail binary is up to date."
+            if [ "$upgrade" = "y" -o "$upgrade" = "yes" ]; then
+                UPGRADE=1
+            fi
         fi
     fi
 else
-    echo "⚠️ Avail binary not found, installing the latest version..."
-    UPGRADE=1
+    if [ -f $AVAIL_BIN ]; then
+        CURRENT_VERSION="$($HOME/.avail/$NETWORK/bin/avail-light --version | awk '{print $1"-v"$2}')"
+        if [ "$CURRENT_VERSION" = "$VERSION" ]; then
+            UPGRADE=1
+            echo "⬆️  Avail binary is out of date. Upgrading..."
+        fi
+    fi
 fi
 
 onexit() {
@@ -269,9 +277,9 @@ if [ -z "$ARCH_STRING" ]; then
     fi
 else
     if command -v curl >/dev/null 2>&1; then
-        curl -sLO https://github.com/availproject/avail-light/releases/download/$LATEST_VERSION/avail-light-$ARCH_STRING.tar.gz
+        curl -sLO https://github.com/availproject/avail-light/releases/download/$VERSION/avail-light-$ARCH_STRING.tar.gz
     elif command -v wget >/dev/null 2>&1; then
-        wget -qO- https://github.com/availproject/avail-light/releases/download/$LATEST_VERSION/avail-light-$ARCH_STRING.tar.gz
+        wget -qO- https://github.com/availproject/avail-light/releases/download/$VERSION/avail-light-$ARCH_STRING.tar.gz
     else
         echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
         exit 1
