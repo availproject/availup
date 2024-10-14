@@ -197,12 +197,8 @@ onexit() {
 
 run_binary() {
     trap onexit EXIT
-    if [ -z "$APPID" ]; then
-        $AVAIL_BIN --config $CONFIG --identity $IDENTITY
-    else
-        $AVAIL_BIN --config $CONFIG --app-id $APPID --identity $IDENTITY
-    fi
-    exit 0
+    $AVAIL_BIN --config $CONFIG --identity $IDENTITY ${APPID:+--app-id $APPID}
+    exit $?
 }
 # check if avail-light binary is available and check if upgrade variable is set to 0
 if [ -f $AVAIL_BIN -a "$UPGRADE" = 0 ]; then
