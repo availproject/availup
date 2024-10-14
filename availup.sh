@@ -151,7 +151,7 @@ if uname -r | grep -qEi "(Microsoft|WSL)"; then
         mkdir $HOME/.avail/$NETWORK/data
     fi
     if [ "$force_wsl" != 'y' -a "$force_wsl" != 'yes' ]; then
-        echo "👀 WSL detected. This script is not fully compatible with WSL. Please download the Windows runner instead by clicking this link: https://github.com/availproject/avail-light/releases/download/$LATEST_VERSION/avail-light-windows-runner.zip Alternatively, rerun the command with --force_wsl y"
+        echo "👀 WSL detected. This script is not fully compatible with WSL. Please download the Windows runner instead by clicking this link: https://github.com/availproject/avail-light/releases/download/$VERSION/avail-light-windows-runner.zip Alternatively, rerun the command with --force_wsl y"
         exit 1
     else
         echo "👀 WSL detected. The binary is not fully compatible with WSL but forcing the run anyway."
@@ -270,13 +270,13 @@ if [ -z "$ARCH_STRING" ]; then
     if [ -d $AVAIL_LIGHT_DIR ]; then
         echo "🔄 Updating avail-light repository and building..."
         cd $AVAIL_LIGHT_DIR
-        git pull -q origin $LATEST_VERSION
-        git checkout -q $LATEST_VERSION
+        git pull -q origin $VERSION
+        git checkout -q $VERSION
         cargo build --release
         cp $AVAIL_LIGHT_DIR/target/release/avail-light $AVAIL_BIN
     else
         echo "📂 Cloning avail-light repository and building..."
-        git clone -q -c advice.detachedHead=false --depth=1 --single-branch --branch $LATEST_VERSION https://github.com/availproject/avail-light.git $AVAIL_LIGHT_DIR
+        git clone -q -c advice.detachedHead=false --depth=1 --single-branch --branch $VERSION https://github.com/availproject/avail-light.git $AVAIL_LIGHT_DIR
         cd $AVAIL_LIGHT_DIR
         cargo build --release
         mv $AVAIL_LIGHT_DIR/target/release/avail-light $AVAIL_BIN
