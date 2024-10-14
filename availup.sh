@@ -8,6 +8,10 @@ while [ $# -gt 0 ]; do
     fi
     shift
 done
+
+# enable default upgrades by default
+upgrade="${upgrade:-y}"  
+
 # generate folders if missing
 if [ ! -d "$HOME/.avail" ]; then
     mkdir $HOME/.avail
@@ -154,29 +158,28 @@ if uname -r | grep -qEi "(Microsoft|WSL)"; then
     fi
 fi
 
-# check if avail-light version matches!
-if [ ! -z "$upgrade" ] || [ "$UPGRADE" = 1 ]; then
+# check if the default upgrade option is enabled
+# if enabled, proceed directly to upgrading the binary
+# if it’s disabled, verify the current version, ask for permission and upgrade if it’s not the latest
+if [ "$upgrade" = "n" ] || [ "$upgrade" = "N" ]; then
     echo "🔄 Checking for updates..."
     if [ -f $AVAIL_BIN ]; then
-        CURRENT_VERSION="v$($HOME/.avail/$NETWORK/bin/avail-light --version | cut -d " " -f 2)"
-
+        CURRENT_VERSION="$($HOME/.avail/$NETWORK/bin/avail-light --version | awk '{print $1"-v"$2}')"
         if [ "$CURRENT_VERSION" != "$VERSION" ]; then
-            UPGRADE=1
-            echo "⬆️  Avail binary is out of date. Upgrading..."
-        else
-            echo "✅ Avail binary is up to date."
-            if [ "$upgrade" = "y" -o "$upgrade" = "yes" ]; then
+            echo "⬆️  Avail binary is out of date. Your current version is $CURRENT_VERSION, but the latest is $VERSION."
+            read -p "Do you want to upgrade to the latest version? (y/n): " upgrade_response
+            if [[ "$upgrade_response" = "y" || "$upgrade_response" = "Y" ]]; then
                 UPGRADE=1
+                echo "🔄 Upgrading to the latest version..."
+            else
+                echo "🚫 Upgrade skipped."
             fi
         fi
     fi
 else
     if [ -f $AVAIL_BIN ]; then
-        CURRENT_VERSION="v$($HOME/.avail/$NETWORK/bin/avail-light --version | cut -d " " -f 2)"
-        if [ "$CURRENT_VERSION" = "$VERSION" ]; then
-            UPGRADE=1
-            echo "⬆️  Avail binary is out of date. Upgrading..."
-        fi
+        UPGRADE=1
+        echo "⬆️  Triggering default upgrade of Avail binary..."
     fi
 fi
 
@@ -204,7 +207,7 @@ if [ -f $AVAIL_BIN -a "$UPGRADE" = 0 ]; then
     run_binary
 fi
 if [ "$UPGRADE" = 1 ]; then
-    echo "🔄 Resetting configuration and data..."
+    echo "🔄 Resetting configuration..."
     if [ -f $AVAIL_BIN ]; then
         rm $AVAIL_BIN
         if [ -f $CONFIG ]; then
@@ -212,11 +215,17 @@ if [ "$UPGRADE" = 1 ]; then
             touch $CONFIG
             if [ "$NETWORK" = "turing" ]; then
                 echo -e $TURING_CONFIG_PARAMS >>$CONFIG
+            elif [ "$NETWORK" = "mainnet" ]; then
+                echo -e $MAINNET_CONFIG_PARAMS >>$CONFIG
+            elif [ "$NETWORK" = "local" ]; then
+                echo -e $LOCAL_CONFIG_PARAMS >>$CONFIG
+            else
+                echo "Unknown network: $NETWORK"
             fi
-        fi
-        if [ -d "$HOME/.avail/$NETWORK/data" ]; then
-            rm -rf $HOME/.avail/$NETWORK/data
-            mkdir $HOME/.avail/$NETWORK/data
+            if [ -d "$HOME/.avail/$NETWORK/data" ]; then
+                rm -rf $HOME/.avail/$NETWORK/data
+                mkdir $HOME/.avail/$NETWORK/data
+            fi
         fi
     else
         echo "🤔 Avail was not installed with availup. Attemping to uninstall with cargo..."

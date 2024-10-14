@@ -66,10 +66,12 @@ curl -sL1 avail.sh | bash -s -- --app_id 1
 > ℹ️ Adding an app ID disables the LC mode and runs your client in an app-specific mode, this might not be your
 > intention.
 
-To upgrade the light client to the latest supported version, you can simply pass the `--upgrade` flag like:
+In availup, binary upgrades are enabled by default to ensure you always have the latest supported version. In order to skip default 
+upgrades you can simply pass the `--upgrade` flag like:
 ```bash
-curl -sL1 avail.sh | bash -s -- --upgrade y
+curl -sL1 avail.sh | bash -s -- --upgrade n
 ```
+Note: If default updates are skipped, everytime the user will be prompted for a permission to upgrade once a new release is made available.
 
 > ℹ️ Upgrading the LC only works if the binary was installed with the latest `availup` script or cargo.
 
