@@ -102,11 +102,11 @@ if [ "$NETWORK" = "mainnet" ]; then
         if [ ! -z "$config_url" ]; then
             echo "📥 Downloading configuration file from $config_url..."
             if command -v curl >/dev/null 2>&1; then
-                curl -s $config_url >>$CONFIG
+                #curl -sL $config_url >>$CONFIG
                 echo -e "avail_path='$HOME/.avail/$NETWORK/data'\n" >>$CONFIG
             elif command -v wget >/dev/null 2>&1; then
-                wget -qO- $config_url >>$CONFIG
-                echo -e "avail_path='$HOME/.avail/$NETWORK/data'" >>$CONFIG
+                #wget -qO- $config_url >>$CONFIG
+                echo -e "avail_path='$HOME/.avail/$NETWORK/data'\n" >>$CONFIG
             else
                 echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
                 exit 1
@@ -222,25 +222,12 @@ if [ -f $AVAIL_BIN -a "$UPGRADE" = 0 ]; then
     run_binary
 fi
 if [ "$UPGRADE" = 1 ]; then
-    echo "🔄 Resetting configuration..."
+    echo "🗑️ Wiping state data..."
     if [ -f $AVAIL_BIN ]; then
         rm $AVAIL_BIN
-        if [ -f $CONFIG ]; then
-            rm $CONFIG
-            touch $CONFIG
-            if [ "$NETWORK" = "turing" ]; then
-                echo -e $TURING_CONFIG_PARAMS >>$CONFIG
-            elif [ "$NETWORK" = "mainnet" ]; then
-                echo -e $MAINNET_CONFIG_PARAMS >>$CONFIG
-            elif [ "$NETWORK" = "local" ]; then
-                echo -e $LOCAL_CONFIG_PARAMS >>$CONFIG
-            else
-                echo "Unknown network: $NETWORK"
-            fi
-            if [ -d "$HOME/.avail/$NETWORK/data" ]; then
-                rm -rf $HOME/.avail/$NETWORK/data
-                mkdir $HOME/.avail/$NETWORK/data
-            fi
+        if [ -d "$HOME/.avail/$NETWORK/data" ]; then
+            rm -rf $HOME/.avail/$NETWORK/data
+            mkdir $HOME/.avail/$NETWORK/data
         fi
     else
         echo "🤔 Avail was not installed with availup. Attemping to uninstall with cargo..."
