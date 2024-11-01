@@ -10,7 +10,7 @@ while [ $# -gt 0 ]; do
 done
 
 # enable default upgrades by default
-upgrade="${upgrade:-y}"  
+upgrade="${upgrade:-y}"
 
 # generate folders if missing
 if [ ! -d "$HOME/.avail" ]; then
@@ -51,8 +51,9 @@ else
     echo "🫣 Unable to locate a compatible shell or rc file, using POSIX default, availup might not work as intended!"
     PROFILE="/etc/profile"
 fi
+
 if [ -z "$network" ]; then
-    echo "🛜  No network selected. Defaulting to mainnet."
+    echo "🛜 No network selected. Defaulting to mainnet."
     NETWORK="mainnet"
 else
     NETWORK="$network"
@@ -92,13 +93,27 @@ if [ "$NETWORK" = "mainnet" ]; then
     if [ -z "$config" ]; then
         CONFIG="$HOME/.avail/$NETWORK/config/config.yml"
         if [ -f "$CONFIG" ]; then
-            echo "🗑️  Wiping old config file at $CONFIG."
+            echo "🗑️ Wiping old config file at $CONFIG."
             rm $CONFIG
         else
             echo "🤷 No configuration file set. This will be automatically generated at startup."
         fi
         touch $CONFIG
-        echo -e $MAINNET_CONFIG_PARAMS >>$CONFIG
+        if [ ! -z "$config_url" ]; then
+            echo "📥 Downloading configuration file from $config_url..."
+            if command -v curl >/dev/null 2>&1; then
+                curl -s $config_url >>$CONFIG
+                echo -e "avail_path='$HOME/.avail/$NETWORK/data'\n" >>$CONFIG
+            elif command -v wget >/dev/null 2>&1; then
+                wget -qO- $config_url >>$CONFIG
+                echo -e "avail_path='$HOME/.avail/$NETWORK/data'" >>$CONFIG
+            else
+                echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
+                exit 1
+            fi
+        else
+            echo -e $MAINNET_CONFIG_PARAMS >>$CONFIG
+        fi
     else
         CONFIG="$config"
     fi
@@ -179,7 +194,7 @@ if [ "$upgrade" = "n" ] || [ "$upgrade" = "N" ]; then
 else
     if [ -f $AVAIL_BIN ]; then
         UPGRADE=1
-        echo "⬆️  Triggering default upgrade of Avail binary..."
+        echo "⬆️ Triggering default upgrade of Avail binary..."
     fi
 fi
 

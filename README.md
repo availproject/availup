@@ -5,7 +5,7 @@ curl -sL1 avail.sh | bash
 ```
 or, with `wget`:
 ```bash
-wget --https-only --secure-protocol=TLSv1_2 --quiet -O - avail.sh | bash
+wget --secure-protocol=TLSv1_2 -q -O - avail.sh | bash
 ```
 You can pass additional flags to the script like:
 ```bash
@@ -16,6 +16,9 @@ Currently available flags are:
 * `network`: can be one of the following: [`mainnet`, `turing`, `local`]
 * `config`: path to the configuration file, availup will generate a config if this flag is not specified
   * This flag is always required when running a local testnet
+* `config_url`: URL to a valid YAML configuration file, availup will download the config if this flag is specified
+  * If the configuration is invalid, the script will exit
+  * This flag will only work with mainnet configurations
 * `identity`: path to the identity file, availup will generate a config if this flag is not specified
   * It is important to keep your identity file safe!
 * `app_id`: application ID to run the light client (defaults to `0`)
@@ -71,9 +74,8 @@ upgrades you can simply pass the `--upgrade` flag like:
 ```bash
 curl -sL1 avail.sh | bash -s -- --upgrade n
 ```
-Note: If default updates are skipped, everytime the user will be prompted for a permission to upgrade once a new release is made available.
 
-> ℹ️ Upgrading the LC only works if the binary was installed with the latest `availup` script or cargo.
+> ℹ️ Upgrading the LC only works if the binary was installed with the latest `availup` script or cargo. If default updates are skipped, everytime the user will be prompted for a permission to upgrade once a new release is made available.
 
 To run the light client on WSL systems, use the `--force_wsl` flag like:
 ```bash
@@ -81,3 +83,10 @@ curl -sL1 avail.sh | bash -s -- --force_wsl y
 ```
 
 > ℹ️ Running this flag on any other system does nothing.
+
+To load a configuration from a URL, use the `--config_url` flag like:
+```bash
+curl -sL1 avail.sh | bash -s -- --config_url https://raw.githubusercontent.com/availproject/availup/main/configs/sophon.yml
+```
+
+> ℹ️ The configuration file must be a valid YAML file, otherwise the script will exit.
