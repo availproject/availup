@@ -1,6 +1,7 @@
+project_name='sophon'
 bootstraps=['/dns/bootnode.1.lightclient.mainnet.avail.so/tcp/37000/p2p/12D3KooW9x9qnoXhkHAjdNFu92kMvBRSiFBMAoC5NnifgzXjsuiM']
 full_node_ws=['wss://mainnet-rpc.avail.so/ws','wss://mainnet.avail-rpc.com','wss://avail-mainnet.public.blastapi.io']
 confidence=80.0
 kad_record_ttl=43200
 genesis_hash='b91746b45e0346cc2f815a520b9c6cb4d5c0902af848db0a80f85932d2e8276a'
-ot_collector_endpoint='http://otel.lightclient.mainnet.avail.so:4317'
+ot_collector_endpoint='http://otel.lightclient.sophon.avail.so:4317'
