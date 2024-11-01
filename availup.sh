@@ -102,10 +102,10 @@ if [ "$NETWORK" = "mainnet" ]; then
         if [ ! -z "$config_url" ]; then
             echo "📥 Downloading configuration file from $config_url..."
             if command -v curl >/dev/null 2>&1; then
-                #curl -sL $config_url >>$CONFIG
+                curl -sL $config_url >>$CONFIG
                 echo -e "avail_path='$HOME/.avail/$NETWORK/data'\n" >>$CONFIG
             elif command -v wget >/dev/null 2>&1; then
-                #wget -qO- $config_url >>$CONFIG
+                wget -qO- $config_url >>$CONFIG
                 echo -e "avail_path='$HOME/.avail/$NETWORK/data'\n" >>$CONFIG
             else
                 echo "🚫 Neither curl nor wget are available. Please install one of these and try again."
