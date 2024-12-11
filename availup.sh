@@ -140,7 +140,7 @@ elif [ "$NETWORK" = "local" ]; then
         exit 1
     fi
 else
-    echo "🚫 Invalid network selected. Select one of the following: turing, local."
+    echo "🚫 Invalid network selected. Select one of the following: mainnet, turing, local."
     exit 1
 fi
 if [ -z "$app_id" ]; then
