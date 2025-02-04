@@ -84,9 +84,9 @@ if [ ! -d "$HOME/.avail/$NETWORK/config" ]; then
     mkdir $HOME/.avail/$NETWORK/config
 fi
 
-readonly MAINNET_VERSION="avail-light-client-v1.12.4"
-readonly TURING_VERSION="avail-light-client-v1.12.4"
-readonly LOCAL_VERSION="avail-light-client-v1.12.4"
+readonly MAINNET_VERSION="avail-light-client-v1.12.5"
+readonly TURING_VERSION="avail-light-client-v1.12.5"
+readonly LOCAL_VERSION="avail-light-client-v1.12.5"
 
 if [ "$NETWORK" = "mainnet" ]; then
     VERSION=$MAINNET_VERSION
