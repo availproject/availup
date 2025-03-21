@@ -28,6 +28,8 @@ Currently available flags are:
     binary will be upgraded.
 * `force_wsl`: takes `y` and `yes` as valid arguments, the script exits on WSL systems by default. This flag can
   removed in the future.
+* `tracking_service`: takes `y` and `yes` as valid arguments, enabling `avail-light` tracking on a provided server
+* `tracking_service_address`: URL to the tracker server, i.e. `http://127.0.0.1:8989`
 
 You can use a custom config by passing it to `availup` as a flag:
 ```bash
