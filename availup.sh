@@ -12,6 +12,10 @@ done
 # enable default upgrades by default
 upgrade="${upgrade:-y}"
 
+# enable tracking service
+tracking_service="${tracking_service:-n}"
+tracking_service_address="${tracking_service_address:-}"
+
 # generate folders if missing
 if [ ! -d "$HOME/.avail" ]; then
     mkdir $HOME/.avail
@@ -212,7 +216,17 @@ onexit() {
 
 run_binary() {
     trap onexit EXIT
-    $AVAIL_BIN --config $CONFIG --identity $IDENTITY ${APPID:+--app-id $APPID}
+
+    CMD="$AVAIL_BIN --config $CONFIG --identity $IDENTITY ${APPID:+--app-id $APPID}"
+    
+    if [ "$tracking_service" = "y" ] || [ "$tracking_service" = "yes" ]; then
+        CMD="$CMD --tracking-service-enable"
+    fi
+    if [ ! -z "$tracking_service_address" ]; then
+        CMD="$CMD --tracking-service-address $tracking_service_address"
+    fi
+    
+    $CMD
     exit $?
 }
 # check if avail-light binary is available and check if upgrade variable is set to 0
