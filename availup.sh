@@ -16,6 +16,8 @@ upgrade="${upgrade:-y}"
 tracking_service="${tracking_service:-n}"
 tracking_service_address="${tracking_service_address:-}"
 
+operator_address="${operator_address:-}"
+
 # generate folders if missing
 if [ ! -d "$HOME/.avail" ]; then
     mkdir $HOME/.avail
@@ -229,6 +231,9 @@ run_binary() {
     fi
     if [ ! -z "$tracking_service_address" ]; then
         CMD="$CMD --tracking-service-address $tracking_service_address"
+    fi
+    if [ ! -z "$operator_address" ]; then
+        CMD="$CMD --operator-address $operator_address"
     fi
     if [ "$upgrade" = "n" ] || [ "$upgrade" = "N" ]; then
 	CMD="$CMD --no-update"

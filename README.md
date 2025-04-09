@@ -30,6 +30,7 @@ Currently available flags are:
   removed in the future.
 * `tracking_service`: takes `y` and `yes` as valid arguments, enabling `avail-light` tracking on a provided server
 * `tracking_service_address`: URL to the tracker server, i.e. `http://127.0.0.1:8989`
+* `operator_address`: Address of the Light Client operator; this field is sent to the tracking service
 
 You can use a custom config by passing it to `availup` as a flag:
 ```bash
