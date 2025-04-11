@@ -88,9 +88,9 @@ if [ ! -d "$HOME/.avail/$NETWORK/config" ]; then
     mkdir $HOME/.avail/$NETWORK/config
 fi
 
-readonly MAINNET_VERSION="avail-light-client-v1.12.10"
-readonly TURING_VERSION="avail-light-client-v1.12.10"
-readonly LOCAL_VERSION="avail-light-client-v1.12.10"
+readonly MAINNET_VERSION="avail-light-client-v1.12.11"
+readonly TURING_VERSION="avail-light-client-v1.12.11"
+readonly LOCAL_VERSION="avail-light-client-v1.12.11"
 
 if [ "$NETWORK" = "mainnet" ]; then
     VERSION=$MAINNET_VERSION
@@ -186,12 +186,18 @@ if [ "$upgrade" = "n" ] || [ "$upgrade" = "N" ]; then
         CURRENT_VERSION="$($HOME/.avail/$NETWORK/bin/avail-light --version | awk '{print $1"-v"$2}')"
         if [ "$CURRENT_VERSION" != "$VERSION" ]; then
             echo "⬆️  Avail binary is out of date. Your current version is $CURRENT_VERSION, but the latest is $VERSION."
-            read -p "Do you want to upgrade to the latest version? (y/n): " upgrade_response
-            if [[ "$upgrade_response" = "y" || "$upgrade_response" = "Y" ]]; then
-                UPGRADE=1
-                echo "🔄 Upgrading to the latest version..."
-            else
-                echo "🚫 Upgrade skipped."
+	    # Force update of the binary if the current version is v1.12.10
+	    if [ "$CURRENT_VERSION" = "avail-light-client-v1.12.10" ]; then
+		UPGRADE=1
+                echo "🔄 Forcing upgrade to the latest version..."
+	    else
+		read -p "Do you want to upgrade to the latest version? (y/n): " upgrade_response
+		if [[ "$upgrade_response" = "y" || "$upgrade_response" = "Y" ]]; then
+                    UPGRADE=1
+                    echo "🔄 Upgrading to the latest version..."
+		else
+                    echo "🚫 Upgrade skipped."
+		fi
             fi
         fi
     fi
@@ -218,12 +224,14 @@ run_binary() {
     trap onexit EXIT
 
     CMD="$AVAIL_BIN --config $CONFIG --identity $IDENTITY ${APPID:+--app-id $APPID}"
-    
     if [ "$tracking_service" = "y" ] || [ "$tracking_service" = "yes" ]; then
         CMD="$CMD --tracking-service-enable"
     fi
     if [ ! -z "$tracking_service_address" ]; then
         CMD="$CMD --tracking-service-address $tracking_service_address"
+    fi
+    if [ "$upgrade" = "n" ] || [ "$upgrade" = "N" ]; then
+	CMD="$CMD --no-update"
     fi
     
     $CMD
