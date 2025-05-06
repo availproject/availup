@@ -116,12 +116,7 @@ is_older() {
 # Version that introduces auto upgrades
 readonly REFERENCE_VERSION="avail-light-client-v1.12.11"
 
-readonly MAINNET_VERSION="avail-light-client-v1.12.11"
-readonly TURING_VERSION="avail-light-client-v1.12.11"
-readonly LOCAL_VERSION="avail-light-client-v1.12.11"
-
 if [ "$NETWORK" = "mainnet" ]; then
-    VERSION=$MAINNET_VERSION
     if [ -z "$config" ]; then
         CONFIG="$HOME/.avail/$NETWORK/config/config.yml"
         if [ -f "$CONFIG" ]; then
@@ -150,7 +145,6 @@ if [ "$NETWORK" = "mainnet" ]; then
         CONFIG="$config"
     fi
 elif [ "$NETWORK" = "turing" ]; then
-    VERSION=$TURING_VERSION
     if [ -z "$config" ]; then
         CONFIG="$HOME/.avail/$NETWORK/config/config.yml"
         if [ -f "$CONFIG" ]; then
@@ -166,7 +160,6 @@ elif [ "$NETWORK" = "turing" ]; then
     fi
 elif [ "$NETWORK" = "local" ]; then
     echo "📌 Local testnet selected."
-    VERSION=$LOCAL_VERSION
     if [ -z "$config" ]; then
         echo "🚫 No configuration file was provided for local testnet, exiting."
         exit 1
@@ -205,36 +198,17 @@ if uname -r | grep -qEi "(Microsoft|WSL)"; then
     fi
 fi
 
-# check if the default upgrade option is enabled
-# if enabled, proceed directly to upgrading the binary
-# if it’s disabled, verify the current version, ask for permission and upgrade if it’s not the latest
-if [ "$upgrade" = "n" ] || [ "$upgrade" = "N" ]; then
-    echo "🔄 Checking for updates..."
-    if [ -f $AVAIL_BIN ]; then
-        CURRENT_VERSION="$($HOME/.avail/$NETWORK/bin/avail-light --version | awk '{print $1"-v"$2}')"
-        if [ "$CURRENT_VERSION" != "$VERSION" ]; then
-            echo "⬆️  Avail binary is out of date. Your current version is $CURRENT_VERSION, but the latest is $VERSION."
-	    # Force update of the binary if the current version is older than reference
-	    if is_older "$CURRENT_VERSION" "$REFERENCE_VERSION"; then
-		UPGRADE=1
-                echo "🔄 Forcing upgrade to the latest version..."
-	    else
-		read -p "Do you want to upgrade to the latest version? (y/n): " upgrade_response
-		if [[ "$upgrade_response" = "y" || "$upgrade_response" = "Y" ]]; then
-                    UPGRADE=1
-                    echo "🔄 Upgrading to the latest version..."
-		else
-                    echo "🚫 Upgrade skipped."
-		fi
-            fi
-        fi
-    fi
-else
-    if [ -f $AVAIL_BIN ]; then
-        UPGRADE=1
-        echo "⬆️ Triggering default upgrade of Avail binary..."
+if [ -f $AVAIL_BIN ]; then
+    CURRENT_VERSION="$($HOME/.avail/$NETWORK/bin/avail-light --version | awk '{print $1"-v"$2}')"
+fi
+
+if [ -n "$CURRENT_VERSION" ]; then
+    if is_older "$CURRENT_VERSION" "$REFERENCE_VERSION"; then
+	UPGRADE=1
+	echo "🔄 Forcing upgrade to the latest version..."
     fi
 fi
+
 
 onexit() {
     chmod 600 $IDENTITY
@@ -300,6 +274,10 @@ elif [ "$(uname -m)" = "aarch64" -o "$(uname -m)" = "arm64" ]; then
 elif [ "$(uname -m)" = "x86_64" ]; then
     ARCH_STRING="linux-amd64"
 fi
+
+# Version to download if upgrade is required
+VERSION="avail-light-client-v1.12.11"
+
 if [ -z "$ARCH_STRING" ]; then
     echo "📥 No binary available for this architecture, building from source instead. This can take a while..."
     # check if cargo is not available, else attempt to install through rustup
