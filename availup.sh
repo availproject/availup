@@ -90,6 +90,32 @@ if [ ! -d "$HOME/.avail/$NETWORK/config" ]; then
     mkdir $HOME/.avail/$NETWORK/config
 fi
 
+
+# Strips the prefix from the version string
+strip_prefix() {
+    echo "$1" | sed 's/^avail-light-client-v//'
+}
+
+# Pads the version string to a fixed length for comparison
+pad_version() {
+    version="$1"
+    major=$(echo "$version" | cut -d. -f1)
+    minor=$(echo "$version" | cut -d. -f2)
+    patch=$(echo "$version" | cut -d. -f3)
+    printf "%03d%03d%03d\n" "$major" "$minor" "$patch"
+}
+
+# Compares two version strings
+is_older() {
+    v1=$(pad_version "$(strip_prefix "$1")")
+    v2=$(pad_version "$(strip_prefix "$2")")
+
+    [ "$v1" -lt "$v2" ]
+}
+
+# Version that introduces auto upgrades
+readonly REFERENCE_VERSION="avail-light-client-v1.12.11"
+
 readonly MAINNET_VERSION="avail-light-client-v1.12.11"
 readonly TURING_VERSION="avail-light-client-v1.12.11"
 readonly LOCAL_VERSION="avail-light-client-v1.12.11"
@@ -188,8 +214,8 @@ if [ "$upgrade" = "n" ] || [ "$upgrade" = "N" ]; then
         CURRENT_VERSION="$($HOME/.avail/$NETWORK/bin/avail-light --version | awk '{print $1"-v"$2}')"
         if [ "$CURRENT_VERSION" != "$VERSION" ]; then
             echo "⬆️  Avail binary is out of date. Your current version is $CURRENT_VERSION, but the latest is $VERSION."
-	    # Force update of the binary if the current version is v1.12.10
-	    if [ "$CURRENT_VERSION" = "avail-light-client-v1.12.10" ]; then
+	    # Force update of the binary if the current version is older than reference
+	    if is_older "$CURRENT_VERSION" "$REFERENCE_VERSION"; then
 		UPGRADE=1
                 echo "🔄 Forcing upgrade to the latest version..."
 	    else
