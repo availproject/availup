@@ -114,7 +114,7 @@ is_older() {
 }
 
 # Version that introduces auto upgrades
-readonly REFERENCE_VERSION="avail-light-client-v1.12.11"
+readonly REFERENCE_VERSION="avail-light-client-v1.12.13"
 
 if [ "$NETWORK" = "mainnet" ]; then
     if [ -z "$config" ]; then
@@ -276,7 +276,7 @@ elif [ "$(uname -m)" = "x86_64" ]; then
 fi
 
 # Version to download if upgrade is required
-VERSION="avail-light-client-v1.12.11"
+VERSION="avail-light-client-v1.12.13"
 
 if [ -z "$ARCH_STRING" ]; then
     echo "📥 No binary available for this architecture, building from source instead. This can take a while..."
