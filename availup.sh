@@ -235,7 +235,7 @@ run_binary() {
     if [ ! -z "$operator_address" ]; then
         CMD="$CMD --operator-address $operator_address"
     fi
-    if [ "$upgrade" = "n" ] || [ "$upgrade" = "N" ]; then
+    if [ "$upgrade" = "n" ] || [ "$upgrade" = "N" ] || [ "$upgrade" = "no" ] || [ "$upgrade" = "NO" ]; then
 	CMD="$CMD --no-update"
     fi
     
