@@ -74,8 +74,8 @@ elif [ "$NETWORK" = "local" ]; then
     echo "📌 Local testnet selected."
 fi
 
-TURING_CONFIG_PARAMS="bootstraps=['/dns/bootnode.1.lightclient.turing.avail.so/tcp/37000/p2p/12D3KooWBkLsNGaD3SpMaRWtAmWVuiZg1afdNSPbtJ8M8r9ArGRT']\nfull_node_ws=['wss://turing-rpc.avail.so/ws','wss://avail-turing.public.blastapi.io','wss://turing-testnet.avail-rpc.com']\nconfidence=80.0\navail_path='$HOME/.avail/$NETWORK/data'\nkad_record_ttl=43200\not_collector_endpoint='http://otel.lightclient.turing.avail.so:4317'\ngenesis_hash='d3d2f3a3495dc597434a99d7d449ebad6616db45e4e4f178f31cc6fa14378b70'\n"
-MAINNET_CONFIG_PARAMS="bootstraps=['/dns/bootnode.1.lightclient.mainnet.avail.so/tcp/37000/p2p/12D3KooW9x9qnoXhkHAjdNFu92kMvBRSiFBMAoC5NnifgzXjsuiM']\nfull_node_ws=['wss://mainnet-rpc.avail.so/ws','wss://mainnet.avail-rpc.com','wss://avail-mainnet.public.blastapi.io']\nconfidence=80.0\navail_path='$HOME/.avail/$NETWORK/data'\nkad_record_ttl=43200\ngenesis_hash='b91746b45e0346cc2f815a520b9c6cb4d5c0902af848db0a80f85932d2e8276a'\not_collector_endpoint='http://otel.lightclient.mainnet.avail.so:4317'\n"
+TURING_CONFIG_PARAMS="bootstraps=['/dns/bootnode.1.lightclient.turing-mmp.avail.so/tcp/37000/p2p/12D3KooWGsdrGGv7BJjjuRTdDS2yZmSmqL5s3YRQREV6vz9cjrbx']\nfull_node_ws=['wss://turing-rpc.avail.so/ws','wss://turing-testnet.avail-rpc.com','wss://avail-turing.api.onfinality.io/public-ws']\nconfidence=80.0\navail_path='$HOME/.avail/$NETWORK/data'\nkad_record_ttl=43200\not_collector_endpoint='http://otel.lightclient.turing.avail.so:4317'\ngenesis_hash='d3d2f3a3495dc597434a99d7d449ebad6616db45e4e4f178f31cc6fa14378b70'\n"
+MAINNET_CONFIG_PARAMS="bootstraps=['/dns/bootnode.1.lightclient.mainnet-mmp.avail.so/tcp/37000/p2p/12D3KooWHgPbEYcvZvZz4aT3KiBdjQmphG5qJ9StWoUps1ofKbJx']\nfull_node_ws=['wss://mainnet-rpc.avail.so/ws','wss://mainnet.avail-rpc.com','wss://avail.api.onfinality.io/public-ws']\nconfidence=80.0\navail_path='$HOME/.avail/$NETWORK/data'\nkad_record_ttl=43200\ngenesis_hash='b91746b45e0346cc2f815a520b9c6cb4d5c0902af848db0a80f85932d2e8276a'\not_collector_endpoint='http://otel.lightclient.mainnet.avail.so:4317'\n"
 AVAIL_BIN=$HOME/.avail/$NETWORK/bin/avail-light
 if [ ! -d "$HOME/.avail/$NETWORK" ]; then
     mkdir $HOME/.avail/$NETWORK
@@ -114,7 +114,7 @@ is_older() {
 }
 
 # Version that introduces auto upgrades
-readonly REFERENCE_VERSION="avail-light-client-v1.13.2"
+readonly REFERENCE_VERSION="avail-light-client-v1.13.3"
 
 if [ "$NETWORK" = "mainnet" ]; then
     if [ -z "$config" ]; then
@@ -276,7 +276,7 @@ elif [ "$(uname -m)" = "x86_64" ]; then
 fi
 
 # Version to download if upgrade is required
-VERSION="avail-light-client-v1.13.2"
+VERSION="avail-light-client-v1.13.3"
 
 if [ -z "$ARCH_STRING" ]; then
     echo "📥 No binary available for this architecture, building from source instead. This can take a while..."
